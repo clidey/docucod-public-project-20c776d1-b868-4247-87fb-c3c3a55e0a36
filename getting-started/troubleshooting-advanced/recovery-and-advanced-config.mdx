@@ -1,0 +1,213 @@
+---
+title: "Advanced Recovery & Configuration"
+description: "For power users: guidance on using virtual terminals, custom overlays, boot modifiers, and troubleshooting advanced hardware situations such as non-standard block sizes, disk integrity protection, and running on headless systems (via telnet)."
+---
+
+# Advanced Recovery & Configuration
+
+This guide is designed for power users who want to extend their control over ShredOS beyond standard workflows. Here, you will find detailed instructions on using virtual terminals, applying custom overlays for persistent system changes, modifying boot parameters for special hardware setups, and handling advanced scenarios such as non-standard block sizes, disk integrity protections, and operating headless via telnet.
+
+---
+
+## 1. Accessing and Using Virtual Terminals
+
+ShredOS runs the secure disk erasure utility (`nwipe`) by default, but multiple virtual terminals are available for advanced troubleshooting and system access without interrupting the primary operation.
+
+### Steps to access virtual terminals:
+
+1. During ShredOS execution, switch to another terminal by pressing:
+   - `Ctrl` + `Alt` + `F2` through `F6`
+2. Each terminal provides a separate shell environment allowing command-line access.
+3. To return to the main `nwipe` interface, press `Ctrl` + `Alt` + `F1`.
+
+<Tip>
+Use virtual terminals to investigate hardware issues, execute diagnostic commands, or check system logs without halting the wipe process.
+</Tip>
+
+### Common uses of virtual terminals:
+- Viewing kernel messages (`dmesg`)
+- Checking mounted filesystems (`mount`, `df -h`)
+- Monitoring system logs (`tail -f /var/log/messages`)
+- Running disk utility commands like `hdparm` or `smartctl`
+
+<Warning>
+Avoid making changes to device state from terminals that might interrupt or corrupt ongoing erasure. Use with caution.
+</Warning>
+
+---
+
+## 2. Applying Custom Overlays for Persistent Configuration
+
+ShredOS supports overlay filesystems allowing you to customize or persist system files such as configuration tweaks, keyboard layouts, or log export scripts.
+
+### Creating and applying overlays:
+
+1. Prepare a writable medium (USB drive or partition) with an overlay directory structure.
+2. Include any file changes you want to persist, e.g., `/etc/modprobe.d/custom.conf` or `/etc/default/keyboard`.
+3. Amend the bootloader configuration (e.g., `grub.cfg`) to mount your overlay:
+
+```bash
+append initrd=/boot/initrd.img root=... overlay=/path/to/your/overlay
+```
+
+4. Boot ShredOS with the adjusted boot parameters.
+5. Verify your files are in place by accessing a virtual terminal.
+
+<Tip>
+Use overlays to add or tweak tools, logging configurations, or custom scripts without rebuilding the entire ShredOS image.
+</Tip>
+
+### Best Practices
+- Keep overlays small and focused.
+- Test overlays in a controlled environment before deployment.
+
+---
+
+## 3. Modifying Boot Parameters for Advanced Hardware Situations
+
+Adjusting kernel and bootloader parameters enables ShredOS to better handle unusual or edge-case hardware scenarios.
+
+### Common boot modifiers and their uses:
+
+| Modifier                  | Purpose | Example Usage |
+|---------------------------|---------|---------------|
+| `rootwait`                | Wait for root device readiness | `append root=/dev/sda1 rootwait` |
+| `console=ttyS0,115200`    | Define console device and speed | `append console=ttyS0,115200` |
+| `panic=5`                 | Kernel panic timeout in seconds | `append panic=5` |
+| `earlyprintk`             | Enable early kernel messages | `append earlyprintk` |
+| `noblank`                 | Disable screen blanking | `append noblank` |
+
+### Customizing Boot Parameters
+
+1. Mount your boot media on another machine.
+2. Edit the `grub.cfg` or `extlinux.conf` file.
+3. Add or modify the `append` or `options` kernel boot line.
+4. Save changes and reboot.
+
+<Tip>
+Test any changes incrementally to avoid boot failures. Keep a rescue media handy.
+</Tip>
+
+---
+
+## 4. Handling Non-Standard Block Sizes and Disk Integrity Protection
+
+Certain disks use non-standard sector sizes or offer hardware integrity features that require special attention.
+
+### Steps to manage these scenarios:
+
+1. Identify disk block sizes via virtual terminal:
+
+```bash
+fdisk -l /dev/sdX
+blockdev --getss /dev/sdX
+```
+
+2. For disks with non-512 byte sectors (e.g., 4K), use compatible drivers and pass appropriate boot parameters if supported.
+
+3. Recognize disks with integrity protection features (e.g., HPA/DCO):
+
+```bash
+hdparm -N /dev/sdX
+```
+
+4. If disk limits exist, use tools like `hdparm` to temporarily disable:
+
+```bash
+hdparm -N pMAX_SECTORS /dev/sdX
+```
+
+(Replace `MAX_SECTORS` with the full drive capacity to expose hidden sectors.)
+
+<Warning>
+Altering HPA or DCO settings can be risky and may render data inaccessible. Only proceed if you understand the implications.
+</Warning>
+
+5. Retry ShredOS wipe after adjustments.
+
+<Tip>
+Refer to ShredOS troubleshooting guides for specific disk vendor quirks and recommended flags.
+</Tip>
+
+---
+
+## 5. Running ShredOS on Headless Systems via Telnet
+
+ShredOS offers headless operation for remote management over network via telnet.
+
+### Enable headless mode:
+
+1. Modify the bootloader configuration to include the kernel parameter:
+
+```bash
+append netconsole=6666@<client-ip>,6666@<server-ip>
+```
+
+2. Boot ShredOS normally.
+3. Connect to ShredOS via a telnet client:
+
+```bash
+telnet <shredos-ip> 23
+```
+
+4. The remote user gains terminal access for controlling erasure and monitoring.
+
+<Tip>
+Use headless mode in trusted, secured networks due to telnet's unencrypted nature.
+</Tip>
+
+### Common use cases:
+- Remote wipe initiation and status checks
+- Monitoring erasure progress on servers without direct video access
+
+<Warning>
+Ensure firewall and network policies allow required ports. Avoid telnet over public or insecure networks.
+</Warning>
+
+---
+
+## Troubleshooting Advanced Recovery & Configuration
+
+### Problem: Cannot switch to a virtual terminal
+- **Cause:** Boot media or kernel missing virtual terminal support.
+- **Solution:** Verify kernel configuration; test with another media or boot method.
+
+### Problem: Custom overlay files not applied on boot
+- **Cause:** Incorrect overlay path or missing boot parameter.
+- **Solution:** Confirm overlay directory structure and correct kernel boot parameter syntax.
+
+### Problem: Disk appears smaller than actual size
+- **Cause:** HPA/DCO is enabled.
+- **Solution:** Use `hdparm` commands to remove limits. Reboot and retry.
+
+### Problem: Headless telnet connection refused
+- **Cause:** Network misconfiguration or firewall blocking port 23.
+- **Solution:** Verify network settings, allow telnet ports, ensure ShredOS is booted with telnet enabled.
+
+### General tips:
+- Use virtual terminals to inspect `dmesg` and `/var/log` for errors.
+- Always keep a rescue live USB available.
+- Apply one advanced configuration change at a time to isolate problems.
+
+---
+
+## Next Steps
+
+- After mastering advanced configuration, explore automation via the [Autonuke and Command Line Options guide](/guides/advanced-usage-customization/nwipe-options-customization).
+- For persistent changes, consider building custom images following [Building ShredOS from Source](/getting-started/installation-setup/build-from-source).
+- Learn to export wipe logs and certificates with the [Logging and Certificate Export guide](/guides/certificates-logging-integration/log-export-workflows).
+
+
+---
+
+## Additional Resources
+
+- [Virtual Terminals and Console Access](../getting-started/first-use-configuration/configuring-options)
+- [Boot Methods and Kernel Parameters](../../overview/architecture/booting-integration)
+- [Troubleshooting Common Hardware Issues](../getting-started/troubleshooting-advanced/common-issues)
+- [Headless Operation and Network Boot](../guides/advanced-usage-customization/headless-remote-wipes)
+
+
+---
+
+This advanced guide arms you with the techniques, commands, and best practices needed to recover, configure, and troubleshoot ShredOS in complex and demanding environments. Use these instructions to maximize control, secure operation, and successful disk erasure under challenging hardware and deployment scenarios.
