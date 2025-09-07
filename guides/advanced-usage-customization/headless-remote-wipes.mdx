@@ -1,0 +1,188 @@
+---
+title: "Wiping Drives on Headless or Remote Systems"
+description: "Shows how to perform secure wipes on systems without a display or keyboard—such as servers or inaccessible endpoints—by using ShredOS with a telnet-enabled configuration. Covers network setup, telnet access, security considerations, and remote monitoring."
+---
+
+# Wiping Drives on Headless or Remote Systems
+
+Secure disk erasure typically requires local interaction via display and keyboard. However, many real-world environments demand secure wiping on headless servers or systems with faulty or absent display and input devices. ShredOS enables such workflows by providing a telnet-enabled configuration that allows remote access to the wiping environment over a secure local network.
+
+---
+
+## 1. Overview
+
+This guide shows you how to perform secure disk wipes using ShredOS on headless or remotely located systems without local display or keyboard access. You will learn how to enable and use ShredOS's built-in telnet server for remote interaction, understand the necessary network setup, and review best practices and security considerations.
+
+
+## 2. Prerequisites
+
+- A system or server that boots from ShredOS media (USB, CD/DVD, or PXE).
+- Network connectivity between the target system running ShredOS and the remote client.
+- The remote client must be on the same trusted local area network (LAN) or connected via a secure channel (VPN).
+- Basic knowledge of using telnet or terminal clients on your remote computer.
+- ShredOS version v2021.08.2_20_0.32.014 or later for telnet support.
+
+
+## 3. Enabling Telnet Server in ShredOS
+
+By default, ShredOS disables the telnet server for security. To enable remote wipe access via telnet:
+
+1. Modify the bootloader configuration files on your ShredOS boot media:
+
+    - `/boot/grub/grub.cfg`
+    - `/EFI/BOOT/grub.cfg`
+
+2. Append the parameter `telnetd=enable` to the Linux kernel command line.
+
+### Example `grub.cfg` snippet with telnet enabled:
+```bash
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+	linux /boot/shredos console=tty3 loglevel=3 telnetd=enable
+}
+```
+
+3. Save the changes and reboot your target system with this media.
+
+
+## 4. Connecting to ShredOS via Telnet
+
+1. After the ShredOS system boots, it will start a telnet server listening on port 23.
+
+2. From a remote PC on the same network (or through a secure tunnel):
+
+    - Discover active hosts with port 23 open using `nmap`:
+    ```bash
+    nmap -p23 192.168.1.0/24 --open
+    ```
+
+3. Connect to the appropriate host using a telnet client:
+```bash
+telnet <target-ip-address>
+```
+
+4. You will be greeted with a login prompt; log in as user `root` with no password:
+```
+shredos login: root
+{ no password }
+```
+
+5. Once logged in, launch the wiping utility:
+```bash
+nwipe
+```
+
+This will start the interactive wiping interface remotely.
+
+
+## 5. Using NWipe Over Telnet
+
+- The NWipe GUI opens in the telnet session. You can select disks, wiping methods, rounds, and other options as you would locally.
+- Popular terminal emulators that work well with NWipe over telnet:
+  - KDE's Konsole
+  - Terminator
+  - Guake
+  - tmux
+  - xfce terminal
+  - xterm
+- Terminals found to have display issues:
+  - Cool Retro Term
+  - QTerminal
+- PuTTY works but uses simpler box-drawing characters. Proper character encoding setup may improve appearance.
+
+
+## 6. Security Considerations
+
+<Warning>
+Due to the inherent insecurity of telnet (plain text transmission), DO NOT use this feature over untrusted or public networks.
+
+Only use telnet-enabled wiping on trusted, isolated local networks or through secured VPN/SSH tunnels.
+
+For enhanced security, avoid enabling telnet unless absolutely necessary. Consider future SSH support if available.
+</Warning>
+
+
+## 7. Troubleshooting Common Scenarios
+
+<AccordionGroup title="Troubleshooting Telnet Access and Usage">
+<Accordion title="Cannot connect to telnet port 23">
+- Ensure ShredOS is booted with `telnetd=enable` kernel parameter.
+- Confirm firewall on target or network allows incoming TCP port 23.
+- Verify the network segment is correct and reachable from the client.
+</Accordion>
+<Accordion title="Telnet session connects but no NWipe display">
+- Confirm login with user `root` (no password).
+- Ensure terminal emulator supports basic ncurses-style interfaces.
+- Try a different terminal emulator if the display is garbled.
+</Accordion>
+<Accordion title="NWipe does not detect drives over telnet session">
+- Check hardware compatibility and drive connections locally.
+- Ensure ShredOS is fully booted and all necessary kernel modules have loaded.
+- Verify drives are detected in other virtual terminals (ALT-F2).
+</Accordion>
+<Accordion title="Display or font in telnet session too small or unreadable">
+- Use recommended terminal emulators known to work well.
+- Adjust font size in the terminal client.
+- Refer to 'Nwipes font size is too small, How to double the size of the text' section in the main documentation.
+</Accordion>
+</AccordionGroup>
+
+
+## 8. Optional: Automating Wipe via Telnet (Advanced)
+
+- You can script NWipe commands inside a telnet session using expect or similar scripting tools.
+- This enables fully automated remote disk wiping without manual interaction.
+- Requires knowledge of NWipe command-line options and session scripting.
+- Refer to `Guides > Advanced Usage & Customization > Wiping Drives on Headless or Remote Systems` for further details if available.
+
+
+## 9. Next Steps & Additional Resources
+
+- Review the [Quickstart: Securely Erasing a Disk](https://docs.shredos.io/guides/getting-started-workflows/quickstart-guide) for comprehensive manual wiping procedures.
+- For automated wipe configuration, consult the [Customizing Nwipe Options and Automation](https://docs.shredos.io/guides/advanced-usage-customization/nwipe-options-customization).
+- Understand network setup and security best practices for remote wipe.
+- Learn about exporting logs and certificates for audit compliance in remote wipes: [Exporting Logs and Certificates to USB or Network](https://docs.shredos.io/guides/certificates-logging-integration/log-export-workflows).
+- For troubleshooting boot and device detection problems, see [Troubleshooting Boot and Disk Detection Issues](https://docs.shredos.io/guides/advanced-usage-customization/troubleshooting-and-recovery).
+
+
+---
+
+### Summary
+This guide empowers IT professionals and system administrators to securely erase disks on headless or remotely located systems using ShredOS's built-in telnet server. It details enabling telnet on ShredOS, connecting remotely, using NWipe's interface over telnet, and covers security warnings and troubleshooting tips.
+
+---
+
+## Example: Enabling Telnet on Boot
+```bash
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+	linux /boot/shredos console=tty3 loglevel=3 telnetd=enable
+}
+```
+
+## Example: Remote Telnet Connection
+```bash
+$ nmap -p23 192.168.1.0/24 --open
+$ telnet 192.168.1.100
+shredos login: root
+{ no password }
+# nwipe
+```
+
+---
+
+<Tip>
+Only enable telnet access on trusted networks. Encryption alternatives such as SSH are preferable.
+</Tip>
+
+<Note>
+Recommended terminal emulators for telnet NWipe sessions include KDE Konsole, terminator, guake, tmux, xfce terminal, and xterm.
+</Note>
+
+---
+
+For more information on ShredOS, building or extending workflows, visit the [ShredOS documentation home](https://docs.shredos.io).

@@ -1,0 +1,155 @@
+---
+title: "Which erase methods are available and which should I use?"
+description: "Explains the erase algorithms offered by nwipe, including DoD, Gutmann, PRNG, and others. Provides guidance on when to select each method based on security needs and time constraints."
+---
+
+# Frequently Asked Questions: Which Erase Methods Are Available and Which Should I Use?
+
+Secure disk erasure is critical for protecting sensitive data, and ShredOS harnesses nwipe's powerful wipe algorithms to meet diverse security and performance needs. This FAQ explores the various erase methods offered by nwipe, explains their differences, and guides you on selecting the method best suited for your requirements.
+
+---
+
+## 1. What erasure methods does nwipe support?
+
+Nwipe provides several methods to securely wipe disks, each varying in security level, speed, and data sanitization approach:
+
+- **Fill With Zeros:** Performs a single pass overwriting the entire device with `0x00` bytes.
+- **Fill With Ones:** Single pass overwriting with `0xFF`.
+- **RCMP TSSIT OPS-II:** Canadian government standard for technical security, employing multiple overwrite passes.
+- **DoD Short (3-pass):** US Department of Defense 5220.22-M three-pass wipe (passes 1,2,7).
+- **DoD 5220.22M (7-pass):** Seven-pass wiping standard from the DoD 5220.22-M.
+- **Gutmann Wipe:** Peter Gutmann’s 35-pass method tailored for magnetic and solid-state storage.
+- **PRNG Stream:** Overwrites with a user-selectable pseudo-random number generator.
+- **Verify Zeros:** Read-only verification that the disk contains all zeros.
+- **Verify Ones:** Read-only verification that the disk contains all ones.
+- **HMG IS5 Enhanced:** UK government enhanced sanitization standard.
+
+Additionally, nwipe supports multiple PRNG types, including Mersenne Twister, ISAAC, ISAAC-64, Lagged Fibonacci, and XORoshiro-256.
+
+---
+
+## 2. How do the erasure methods differ?
+
+Each method differs primarily in:
+
+- **Number of passes:** More passes mean higher assurance of data removal but longer operation times.
+- **Overwrite pattern:** Fixed byte patterns like zeros or ones, random data, or government/military standards.
+- **Verification:** Some methods include verification passes to confirm successful overwrite.
+
+### Examples
+- **Fill With Zeros/Ones:** Fast but less secure; suitable for general data removal when low risk.
+- **DoD Methods:** Well-known standards balancing thoroughness and performance; approved for sensitive data.
+- **Gutmann:** Extremely thorough, designed for magnetic disks to counter complex magnetic residue patterns; generally slow.
+- **PRNG Stream:** Useful when random overwrite is needed as a simple secure option.
+
+---
+
+## 3. When should I use each erase method?
+
+### Choosing Based on Security Needs
+- **Basic wiping (e.g., zeros or ones):**
+  - When speed is important, and data sensitivity is moderate.
+  - Good for devices intended for reuse within trusted environments.
+
+- **DoD 3-pass or 7-pass:**
+  - When wiping data classified as confidential or sensitive.
+  - Commonly accepted by government and military organizations.
+
+- **Gutmann Wipe:**
+  - For high-security scenarios needing the strongest assurance.
+  - Important for disposing of magnetic storage needing robust data sanitization.
+
+- **PRNG Stream:**
+  - When a user requires random pattern wipes but doesn't want lengthy multi-pass methods.
+
+- **Verification methods:**
+  - To confirm a disk is already wiped (e.g., Verify Zeros) before reuse.
+
+### Device-Specific Notes
+- SSDs, NVMe, and firmware-based devices may require special firmware erase methods rather than traditional overwrites (see guides for SSD/NVMe wiping).
+
+---
+
+## 4. How do the pseudo-random number generators (PRNGs) impact wipe effectiveness?
+
+Nwipe includes several PRNG algorithms to produce random data streams when using PRNG Stream methods:
+
+- **Mersenne Twister (mt19937ar-cok):** Well-tested and widely used.
+- **ISAAC and ISAAC-64:** Designed for cryptographically secure random streams.
+- **Lagged Fibonacci:** Introduced in recent versions for increased complexity.
+- **XORoshiro-256:** Recent, fast, and high-quality pseudo-random number generator.
+
+Selecting a good PRNG adds confidence that overwrite data is unpredictable, which is important for secure deletion.
+
+---
+
+## 5. What happens if I choose a verification method?
+
+Verification-only methods do not alter data but scan the disk to confirm whether it contains the expected pattern of zeros or ones.
+
+- Use **Verify Zeros** to check if the disk has been zeroed.
+- Use **Verify Ones** to check if the disk contains all ones.
+
+These methods help validate prior erasures or check media state.
+
+---
+
+## 6. How do I select a wipe method in ShredOS?
+
+When using ShredOS and its nwipe utility:
+
+- You will find an interactive menu to select the wipe method.
+- The default is often set to DoD Short (3-pass).
+- You can customize the wipe method by modifying the `nwipe_options` kernel parameter in the bootloader's `grub.cfg`.
+
+Example kernel command line to start nwipe with zeros method and no verification:
+
+```bash
+nwipe_options="--method=zero --verify=off"
+```
+
+---
+
+## 7. How long does each erase method take?
+
+- **Fastest:** Fill With Zeros or Ones, single pass, suitable for quick wipes.
+- **Moderate:** DoD 3-pass, usually completes in a reasonable time with higher security.
+- **Slowest:** Gutmann's 35 passes take many hours; only use when maximum assurance is needed.
+
+The duration depends primarily on disk size and drive speed.
+
+---
+
+## 8. Are there risks or things to consider when choosing an erase method?
+
+- **Data Recovery Risk:** Shorter or fewer passes mean lower assured data sanitization.
+- **Disk Wear:** Multiple passes can reduce SSD lifespan; consider firmware-based erase instead.
+- **Time vs Security Tradeoff:** Choose a method appropriate to your security requirements and available time.
+
+Always confirm drive selection before wiping; the process is irreversible.
+
+---
+
+## 9. Can I automate wipe method selection?
+
+Yes, ShredOS lets you specify wipe methods and other `nwipe` options via kernel command line in the bootloader (`grub.cfg`). This can automate wipes, choose methods, set rounds, verification, and more.
+
+---
+
+## Additional Resources
+
+- [ShredOS Quickstart Guide](../guides/getting-started-workflows/quickstart-guide) — Learn how to perform secure wipes step-by-step.
+- [ShredOS Keyboard Layout and Locale Persistence](../guides/advanced-usage-customization/keyboard-locale-persistence) — Customize keyboard behavior.
+- [Wipe SSD and NVMe Using Firmware Commands](../guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme) — For modern storage devices.
+- [Multi-Disk Wipe on Server or Rack](../guides/expert-practices-special-cases/multi-disk-wipe-server-rack) — Best practices for large scale erasure.
+- [Configuring ShredOS Options](../getting-started/first-use-configuration/configuring-options) — How to set default wipe parameters.
+
+---
+
+> <Check>
+> Always double-check which disk you select before starting a wipe.
+> Consider your security needs vs time constraints when choosing the method.
+> Use firmware-based erase on SSDs when available to protect drive longevity.
+> </Check>
+
+---

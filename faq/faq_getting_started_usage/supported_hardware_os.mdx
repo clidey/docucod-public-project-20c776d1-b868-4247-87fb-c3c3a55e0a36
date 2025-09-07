@@ -1,0 +1,127 @@
+---
+title: "What systems and drives does ShredOS support?"
+description: "Explains which processors, systems (including headless), and drive types (HDD, SSD, NVMe, SAS, USB) are supported by ShredOS. Describes image selection (32/64 bit, .img/.iso) and hardware quirks for users to be aware of."
+---
+
+# What systems and drives does ShredOS support?
+
+ShredOS is designed to provide reliable, secure disk erasure across a wide range of hardware. This page details which processors, system types (including headless servers), and drive interfaces and technologies ShredOS supports. It also explains how to select the appropriate ShredOS image for your system architecture and hardware quirks you should be aware of when preparing for disk wiping.
+
+---
+
+## Supported Processor Architectures and Systems
+
+ShredOS primarily targets modern x86 and x86_64 (64-bit Intel/AMD) architectures, with official builds supporting:
+
+- **x86_64 (64-bit Intel/AMD processors)**: Recommended for most modern desktops, laptops, and servers.
+- **i386 (32-bit Intel/AMD processors)**: Available for older hardware requiring a 32-bit OS image.
+
+These architectures cover the vast majority of PCs and servers in use. Support includes both BIOS and UEFI firmware interfaces.
+
+### Headless Systems
+
+ShredOS fully supports headless systems (systems without graphical output) such as rack servers, blade servers, and embedded devices, enabling wiping over serial or network console connections. For headless operation, refer to relevant ShredOS guides for remote wipes via telnet and PXE boot setups.
+
+### Non-x86 Architectures
+
+While ShredOS buildroot configurations and some components can support other architectures like ARM, PowerPC, MIPS, etc., official ShredOS releases focus on x86/i386 targets. Users requiring custom support should consult advanced Buildroot and builder-guide documentation to create tailored images.
+
+---
+
+## Supported Drive Types and Interfaces
+
+ShredOS supports wiping virtually all common drive types encountered in typical user and enterprise environments.
+
+### Hard Disk Drives (HDDs)
+- Traditional spinning hard drives connected via SATA, PATA, or SAS interfaces
+- Supported for all standard wipe methods
+
+### Solid State Drives (SSDs)
+- SATA SSDs recognized and wiped via overwriting or firmware commands where supported
+- SSD firmware-level erasures using `hdparm` utility for ATA secure erase and sanitization
+
+### NVMe Drives
+- NVMe PCIe drives supported
+- Firmware enhanced erase operations using `nvme-cli` sanitize commands available
+
+### SAS Drives
+- Serial Attached SCSI drives commonly found in servers
+- Supported by standard wipe methods
+
+### USB-attached Drives
+- USB flash drives and USB-attached external HDDs/SSDs detected and wipeable
+- Keep in mind some USB adapters or enclosures may cause issues (see troubleshooting for adapter quirks)
+
+### Other Storage Media
+- Optical media, floppy drives, and non-standard devices are generally not targets for disk wiping within ShredOS.
+
+---
+
+## Image Selection: 32-bit vs 64-bit, .img vs .iso
+
+Choosing the correct ShredOS image ensures compatibility with your system's CPU architecture and boot firmware.
+
+| Image Type     | Description                                          | When to Use                                               |
+|----------------|------------------------------------------------------|-----------------------------------------------------------|
+| **32-bit (.img & .iso)**  | Compatible with i386 (32-bit) processors                  | Use for legacy systems or older hardware without 64-bit CPU capability |
+| **64-bit (.img & .iso)**  | Compatible with x86_64 64-bit processors and firmware   | Recommended for modern PCs, laptops, and servers          |
+| **.img files**  | Raw disk images, usually for USB flash drive creation | Use when creating bootable USB media with tools like `dd` or Rufus          |
+| **.iso files**  | Optical disk images suitable for CD/DVD burning       | Use when burning to optical media or for booting in virtual machines       |
+
+### BIOS vs UEFI Boot
+
+ShredOS images support booting from BIOS (Legacy) and UEFI firmware depending on the build and your system. Review your system's firmware mode and select the appropriate image accordingly. For mixed UEFI/BIOS environments, a multi-boot solution such as Ventoy can simplify image selection.
+
+---
+
+## Hardware Quirks and Considerations
+
+### CPU and System Compatibility
+
+- Verify your CPU architecture before selecting 32-bit or 64-bit ShredOS images.
+- Systems with non-x86 CPUs require custom builds or are unsupported.
+- Minimum RAM requirements are generally 1 GB to ensure stable operation.
+
+### Drive Recognition
+
+- Most SATA, SAS, USB, SSD, and NVMe drives are detected automatically by the kernel and `nwipe` utility.
+- Some USB adapters and USB-SSD enclosures may not expose correct low-level disk access needed for wiping; refer to the troubleshooting section if drives are not detected.
+
+### Firmware and Encryption
+
+- Drives with hardware encryption or complex firmware may require special handling; ShredOS supports firmware-level erases for many SSDs and NVMe drives.
+- Frozen or locked drives need to be unfrozen using procedures documented in advanced guides.
+
+### Booting on ARM or other embedded boards
+
+- Custom builds are needed for ARM or other processors; the official ShredOS releases do not cover these platforms out of the box.
+
+---
+
+## Practical Tips for Successful Wipe Preparation
+
+- **Confirm your CPU architecture and firmware boot mode** before downloading ShredOS. Use 64-bit images on modern hardware.
+- **Use the appropriate image format** to match your boot media: `.img` for USB, `.iso` for CD/DVD.
+- **Check drive interface and enclosure compatibility** if using USB adapters; some third-party USB bridges may not fully support secure erase commands.
+- **Consider firmware-based erasure** for SSD and NVMe drives to achieve faster and more secure wipes.
+- **Refer to the Troubleshooting Common Issues** documentation if drives fail to appear or erases fail.
+
+---
+
+## Related Documentation
+
+- [Download ShredOS](../getting-started/installation-setup/download-shredos): Guidance on selecting and downloading the correct ShredOS images.
+- [Booting and Running ShredOS](../guides/getting-started-workflows/booting-running-shredos): Instructions on booting ShredOS on BIOS, UEFI, and headless systems.
+- [Supported Hardware and System Requirements](../getting-started/introduction-overview/supported-hardware-and-requirements): Overview of CPU architectures, RAM requirements, and firmware compatibility.
+- [Wiping SSD and NVMe Drives Using Firmware Commands](../guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme): Detailed methods for firmware-level secure erase.
+- [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues): Solutions for hardware detection and boot problems.
+
+---
+
+<Check>
+Always verify hardware compatibility and select the matching ShredOS image before creating boot media to avoid boot or wipe failures.
+</Check>
+
+<Info>
+Headless system users should review remote wipe and telnet guides to leverage ShredOS on servers with no direct monitor access.
+</Info>

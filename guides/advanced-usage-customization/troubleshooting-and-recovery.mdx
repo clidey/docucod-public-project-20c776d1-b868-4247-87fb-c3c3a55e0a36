@@ -1,0 +1,188 @@
+---
+title: "Troubleshooting Boot and Disk Detection Issues"
+description: "A solutions-oriented guide to resolving common issues such as blank screens, drives not appearing in Nwipe, frozen state on SSDs, or boot device conflicts. Includes recommendations for compatible hardware, workarounds, and links to deeper reference docs."
+---
+
+# Troubleshooting Boot and Disk Detection Issues
+
+This guide provides clear, practical solutions to common problems encountered during boot or disk detection with ShredOS. Whether you face blank screens, missing drives in Nwipe, SSD freezes, or boot device conflicts, follow these step-by-step instructions to resolve these issues efficiently.
+
+---
+
+## 1. Understanding the Problem Context
+
+ShredOS relies on your system's firmware and hardware compatibility to detect and securely wipe drives. Issues during boot or disk detection often arise from hardware incompatibilities, firmware configuration conflicts, or limitations with certain drive types or connection methods.
+
+This page targets problems specifically related to booting ShredOS and detecting attached storage devices through Nwipe.
+
+---
+
+## 2. Prerequisites Before Troubleshooting
+
+- You have a ShredOS bootable media (USB or CD/DVD) prepared and verified [How to Create Bootable Media](/getting-started/installation-setup/create-bootable-media).
+- Your system meets ShredOS minimum hardware and firmware requirements [Supported Hardware and Requirements](/getting-started/introduction-overview/supported-hardware-and-requirements).
+- You understand your system's boot mode (BIOS vs UEFI) and can access firmware settings.
+
+---
+
+## 3. Common Boot and Disk Detection Issues and How to Fix Them
+
+### Issue 1: Blank Screen on Boot
+
+**Symptoms:** The system boots from ShredOS media but displays a blank or black screen.
+
+**Causes & Solutions:**
+- **Incompatible graphics modes:** ShredOS may attempt to use a video mode unsupported by your GPU or monitor.
+  - Boot with the `noblank` kernel parameter to disable screen blanking.
+  - Force basic VGA mode by editing boot parameters (e.g., add `vga=normal` or `gfxpayload=vga=text`).
+- **Mac or UEFI firmware quirks:** Mac hardware or specific UEFI setups can cause video initialization failure.
+  - Use BIOS compatibility or CSM mode if available.
+  - Consult [Booting and Running ShredOS](/guides/getting-started-workflows/booting-running-shredos) for Mac-specific boot instructions.
+
+---
+
+### Issue 2: Drives Not Detected in Nwipe
+
+**Symptoms:** Target drives do not appear in the Nwipe interface, preventing selection or wiping.
+
+**Causes & Solutions:**
+- **Unsupported drive interfaces or adapters:** Some USB adapters or RAID controllers may not be supported.
+  - Use direct SATA connections where possible.
+  - Avoid USB adapters known to have driver or compatibility issues.
+- **Drive power or connection issues:** Drives may not be fully powered or properly connected.
+  - Ensure all drives have stable power supplies.
+  - Re-seat cables and confirm BIOS/UEFI recognizes drives first.
+- **Firmware-related drive locks or HPA/DCO:** Hidden areas on drives may prevent detection.
+  - Use tools specific for clearing HPA/DCO (outside ShredOS scope).
+  - Check the guide on [Wiping SSDs and NVMe Drives Using Firmware Commands](/guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme).
+
+---
+
+### Issue 3: SSDs Freeze or Enter a Frozen State
+
+**Symptoms:** SSDs become unresponsive or the system appears frozen during wipe initiation.
+
+**Cause & Solutions:**
+- Some SSDs or NVMe drives enter a frozen security state after boot.
+- To resolve, perform a secure erase using firmware commands following expert guidance [Firmware Enhanced Erase for SSD/NVMe](/guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme).
+- Alternatively, power cycle the drive or use a different SATA port to reset the frozen state.
+
+---
+
+### Issue 4: Boot Device Conflicts and Bootloader Problems
+
+**Symptoms:** ShredOS fails to boot, or the system boots the wrong device.
+
+**Cause & Solutions:**
+- Incorrect boot order in BIOS/UEFI settings.
+  - Enter firmware setup and prioritize ShredOS boot media.
+- Secure Boot enabled in UEFI blocking ShredOS boot.
+  - Disable Secure Boot temporarily.
+  - Use ShredOS UEFI builds with proper Secure Boot signatures if available.
+- Faulty or corrupted boot media.
+  - Recreate bootable USB or CD/DVD following [Download ShredOS and create bootable media](/getting-started/installation-setup/download-shredos).
+- Conflicts in multi-boot USB drives (e.g., Ventoy).
+  - Consult [Advanced: Multi-Boot with Ventoy](/getting-started/installation-setup/ventoy-and-multi-boot) guide for correct setup and troubleshooting.
+
+---
+
+## 4. Recommended Workarounds and Hardware Tips
+
+- Use native SATA or NVMe ports instead of USB adapters where possible.
+- Prefer USB 2.0 ports over USB 3.0 if facing detection issues with USB drives.
+- Verify BIOS/UEFI firmware updates are applied to support newer hardware.
+- For persistent graphical issues, switch to text mode boot by appending `text` or `gfxpayload=vga=text` to the kernel boot parameters.
+
+---
+
+## 5. Step-by-Step Troubleshooting Workflow
+
+<Steps>
+<Step title="Check and Adjust Boot Mode">
+Make sure your system boots in the correct firmware mode (BIOS vs UEFI) matching your ShredOS image. Use the BIOS boot menu or firmware setup to select the appropriate boot device.
+</Step>
+<Step title="Verify Boot Media Integrity">
+Use checksum verification tools to confirm your ShredOS boot image is not corrupted.
+</Step>
+<Step title="Use Kernel Parameters to Resolve Display Issues">
+Edit the ShredOS bootloader config (grub.cfg) on the media to add `noblank`, `vga=normal`, or `gfxpayload=vga=text` to disable problematic graphics modes.
+</Step>
+<Step title="Check Drive Connection and Power">
+Open your system and verify that all drives are connected with proper cables and have adequate power.
+</Step>
+<Step title="Exclude Problematic Drives from Nwipe">
+Use command-line options or the Nwipe UI to exclude drives that are causing detection issues, such as your boot media.
+</Step>
+<Step title="Secure Boot and Firmware Settings">
+Disable Secure Boot in your UEFI settings if ShredOS does not boot. Ensure that any required settings for booting legacy or non-signed images are correctly applied.
+</Step>
+<Step title="Test With Known-Compatible Hardware">
+If problems persist, try ShredOS on a known compatible system or with a different USB drive to isolate hardware-related issues.
+</Step>
+</Steps>
+
+---
+
+## 6. Practical Examples and Boot Parameter Configuration
+
+### Adding Kernel Parameters to ShredOS Boot Loader
+
+1. Open the bootable USB or CD media on another computer.
+2. Edit `grub.cfg` in the `/boot/grub/` directory.
+3. Find the `linux` line and append parameters. For example:
+
+```ini
+linux /boot/vmlinuz quiet splash noblank gfxpayload=vga=text
+```
+
+4. Save the file and safely eject the media.
+
+### Excluding a Boot Drive From Nwipe
+
+Launch Nwipe and:
+- Navigate to the device list.
+- Select your boot media device.
+- Press the exclude button or use the kernel option `-exclude=<device>` where `<device>` is the device name like `/dev/sdb`.
+
+---
+
+## 7. Troubleshooting Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| No boot device found | Wrong boot order or missing boot media | Check BIOS/UEFI boot priority and verify boot media is inserted correctly |
+| Drive not found in Nwipe | Unsupported USB adapter or drive powered off | Use direct SATA connection and ensure drive power |
+| ShredOS freezes during wipe on SSD | SSD frozen in locked state | Use firmware erase methods and power cycle drive |
+| Blank or black screen after boot | Unsupported video mode or firmware quirks | Boot with `noblank` and `gfxpayload=vga=text` kernel params |
+| Secure Boot blocks ShredOS boot | Secure Boot enabled | Disable Secure Boot or use signed ShredOS image |
+
+---
+
+## 8. Additional Resources and Next Steps
+
+- Review the [System Architecture & Integration Guide](/overview/architecture/system-overview) for detailed boot workings.
+- Use the [Booting and Running ShredOS Guide](/guides/getting-started-workflows/booting-running-shredos) for firmware and media preparation.
+- Understand hardware support via [System Requirements & Supported Hardware](/getting-started/introduction-overview/supported-hardware-and-requirements).
+- Dive into SSD specific erase challenges via [Wiping SSDs and NVMe Drives Using Firmware Commands](/guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme).
+- For unresolved issues, see [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues).
+
+---
+
+# Summary
+
+This guide empowers users to address and resolve fundamental boot and disk detection challenges in ShredOS, improving their confidence and success with secure disk erasure workflows. Key sections cover diagnosis of blank screens, missing drives, SSD freezes, and bootloader conflicts, alongside stepwise remedies and configuration tips to optimize hardware compatibility and user experience.
+
+---
+
+Helpful Related Pages:
+- [Booting and Running ShredOS](/guides/getting-started-workflows/booting-running-shredos)
+- [System Requirements & Supported Hardware](/getting-started/introduction-overview/supported-hardware-and-requirements)
+- [Wiping SSDs and NVMe Drives Using Firmware Commands](/guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme)
+- [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues)
+- [Advanced: Multi-Boot with Ventoy](/getting-started/installation-setup/ventoy-and-multi-boot)
+
+Recommended Next Steps:
+- Verify hardware compatibility and boot media correctness.
+- Adjust bootloader kernel parameters for display and drive detection.
+- Consider firmware erase methods for SSDs experiencing freeze.
+- Explore advanced troubleshooting if issues persist.

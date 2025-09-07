@@ -1,0 +1,166 @@
+---
+title: "System Requirements & Supported Hardware"
+description: "Review the supported CPUs, architectures, and minimum hardware specs. Understand which USB/CD/BIOS/UEFI requirements must be met, and which releases are best for different system types (32 vs 64 bit, legacy BIOS vs UEFI, etc)."
+---
+
+# System Requirements & Supported Hardware
+
+Understanding the system requirements and supported hardware is critical for a smooth and efficient deployment of ShredOS. This document outlines the supported CPU architectures, minimum hardware specifications, and necessary boot method support to ensure compatibility across various platforms.
+
+---
+
+## 1. Supported CPU Architectures
+
+ShredOS supports secure erasure on several popular CPU architectures. Your system's CPU must be one of the following to guarantee full compatibility:
+
+- **x86_64 (64-bit Intel/AMD)**
+- **i386 (32-bit Intel/AMD)**
+
+These architectures are supported by the underlying Linux system and the nwipe utility on which ShredOS is based.
+
+### Notes on Architecture Support
+
+- ShredOS currently targets only `x86_64` and `i386`. Other CPU architectures, such as ARM or PowerPC, are outside the scope of this release.
+- Compatibility includes common PC and server hardware using these architectures.
+
+---
+
+## 2. Minimum Hardware Specifications
+
+To run ShredOS effectively, your hardware must meet these minimum specifications:
+
+### CPU
+- Must be compatible with `x86_64` or `i386` instruction sets.
+
+### Memory (RAM)
+- Minimum: 1 GB RAM
+- Recommended: 2 GB or more for smoother operation and to support advanced features.
+
+### Storage
+- USB flash drive or optical media (CD/DVD) capable of booting ShredOS.
+- Sufficient storage capacity to hold the ShredOS bootable image (typically 1 GB or larger USB drive).
+
+### Boot Support
+- **BIOS or UEFI** firmware capable of booting from USB or optical media.
+
+---
+
+## 3. USB and Optical Media Compatibility
+
+ShredOS can be booted from USB flash drives or CD/DVD media.
+
+### USB Boot
+- Requires that the target system's BIOS or UEFI supports booting from USB devices.
+- USB 2.0 or 3.0 ports supported; no special USB adapters required.
+
+### Optical Media Boot
+- Compatible with CD-ROM and DVD-ROM drives.
+- Works on systems with legacy BIOS or UEFI firmware.
+
+<Tip>
+Before creating bootable media, verify your system's BIOS/UEFI settings to enable booting from the desired media type.
+</Tip>
+
+---
+
+## 4. BIOS vs. UEFI Booting
+
+ShredOS supports both legacy BIOS and modern UEFI boot methods, ensuring broad hardware compatibility.
+
+### BIOS (Legacy)
+- Standard BIOS boot is supported on most traditional PC hardware.
+- Suitable for older systems without UEFI support.
+
+### UEFI
+- Fully supported, including Secure Boot disabled or properly configured systems.
+- Recommended for newer hardware.
+
+<Warning>
+Secure Boot must be disabled or configured to allow ShredOS to boot on UEFI systems, as ShredOS does not currently support Secure Boot signatures.
+</Warning>
+
+---
+
+## 5. Recommended ShredOS Releases per System Type
+
+| System Type       | Recommended ShredOS Release          | Notes                                         |
+|-------------------|------------------------------------|-----------------------------------------------|
+| 32-bit (i386) PCs  | ShredOS i386-compatible build      | Compatible with older hardware                 |
+| 64-bit PCs        | ShredOS x86_64 default build       | Supports latest CPUs and features              |
+| Legacy BIOS       | Use latest stable Buildroot based release | Ensure BIOS supports USB/CD booting    |
+| UEFI Systems      | Use latest UEFI-enabled ShredOS build | Disable Secure Boot if required               |
+
+---
+
+## 6. Additional Supported Hardware Considerations
+
+### Disk Types
+ShredOS supports wiping of a wide variety of disks detected by the underlying Linux kernel, including but not limited to:
+
+- SATA HDDs and SSDs
+- NVMe drives
+- USB-connected storage devices
+
+### Common Hardware Drivers Supported
+Full support is included for relevant storage, USB, and filesystem drivers present in the ShredOS kernel build.
+
+<Note>
+Specific exotic hardware or non-x86 architectures may require custom kernel builds or are currently unsupported.
+</Note>
+
+---
+
+## 7. Verifying Hardware Compatibility Before Use
+
+Before deployment, ensure your system meets compatibility criteria:
+
+1. **Check CPU Architecture:**
+   ```bash
+   uname -m
+   # Outputs: x86_64 (64-bit) or i686/i386 (32-bit)
+   ```
+2. **Check BIOS/UEFI Boot Options:**
+   - Access firmware setup and confirm boot order supports USB and/or optical boot.
+
+3. **Confirm Sufficient RAM:**
+   - Minimum 1 GB RAM present.
+
+4. **Identify Disk Devices:**
+   - Use Linux live environment or BIOS HDD info to verify disk presence.
+
+<Warning>
+If the system does not meet the above minimum requirements, booting ShredOS may fail or performance may be degraded.
+</Warning>
+
+---
+
+## 8. Summary
+
+ShredOS is designed for x86_64 and i386 PCs, running effectively on hardware with at least 1 GB RAM and with BIOS or UEFI capable of booting from USB or optical drive. Ensuring your system meets these prerequisites will enable a straightforward setup and successful secure drive erasure experience.
+
+---
+
+## See Also
+
+- [What is ShredOS?](/getting-started/introduction-overview/what-is-shredos)
+- [Download ShredOS](/getting-started/installation-setup/download-shredos)
+- [Create Bootable USB or CD/DVD](/getting-started/installation-setup/create-bootable-media)
+- [Boot Methods & System Integration](/overview/architecture/booting-integration)
+- [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues)
+
+---
+
+## Internal References
+- Architecture config options from Buildroot: support for x86_64 and i386 tested
+- Kernel config enumerations to support broad hardware platforms (bios, uefi)
+- Release notes suggest improvements and stable support for i386 and x86_64
+
+---
+
+<Check>
+Ensure your system supports booting from USB or optical media before preparing ShredOS bootable media.
+</Check>
+
+<Info>
+Review kernel boot options if running into issues with UEFI firmware.
+</Info>

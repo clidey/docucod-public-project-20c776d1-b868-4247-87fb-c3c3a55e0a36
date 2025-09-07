@@ -1,0 +1,245 @@
+---
+title: "How do I automate drive wiping or change defaults?"
+description: "Shows how to customize shredos/nwipe behavior using kernel parameters and grub.cfg, including autonuke, autologout, persistent logging, and passing nwipe options for unattended or headless operation."
+---
+
+# Automating Drive Wiping and Changing Defaults in ShredOS
+
+ShredOS empowers users with a highly customizable and automatable disk wiping experience. This page details how to configure and automate ShredOS and its underlying utility, nwipe, by leveraging Linux kernel command-line parameters and bootloader settings within grub.cfg. These methods enable unattended disk erasure, headless operation, persistent logging, autonuke automation, and fine-tuning of all wipe parameters.
+
+---
+
+## 1. Introduction
+
+If you aim to streamline repetitive wiping tasks or integrate ShredOS into batch or networked environments, automating drive wiping and default settings is essential. ShredOS supports passing runtime options at boot via kernel parameters embedded in grub.cfg files. By configuring these parameters, you can set wipe methods, enable logging and certificate generation, control automatic logout and shutdown behaviors, run unattended wipe cycles (autonuke), and override interactive defaults—all without manual intervention.
+
+This guide covers practical workflows for configuring these options, tips for persistence, and best practices to avoid common pitfalls.
+
+---
+
+## 2. How ShredOS and Nwipe Accept Configuration
+
+The core wipe engine in ShredOS, nwipe, is controlled at boot time via Linux kernel parameters. These parameters are set in your bootloader configuration—commonly within the grub.cfg file on your boot media (USB stick, CD/DVD, Ventoy, etc.). When ShredOS boots, the kernel reads these parameters and passes them to nwipe to customize behavior.
+
+### Key Aspects:
+
+- **Kernel Parameters:** ShredOS reads kernel command-line parameters to adjust wipe methods, logging, device exclusion, and automation.
+- **grub.cfg:** This is the primary location where these kernel parameters are placed for persistent or session-based overrides.
+- **Autonuke Mode:** Enables fully unattended wiping after boot, suitable for bulk erasure operations.
+- **Persistent Logging:** Ensures logs and certificates are saved automatically to external media or network locations.
+
+### Typical Parameter Syntax
+
+Parameters generally include key-value pairs and flags such as:
+
+```bash
+nwipe-method="dodshort"
+nwipe-verify=1
+skip-bootdisk=1
+certfile="/path/to/save/certs"
+autonuke=1
+autologout-time=300
+```
+
+These are appended to the kernel command line in grub.cfg entries.
+
+---
+
+## 3. Editing grub.cfg to Customize Defaults and Automate Wipes
+
+### 3.1 Locate Your grub.cfg
+
+- On USB boot media (UEFI or BIOS), this file is under `/boot/grub/`.
+- When using Ventoy, it sits inside the Ventoy USB partition in the grub directory.
+
+### 3.2 Adding Kernel Parameters
+
+Find the menuentry section for ShredOS and modify the `linux` line to include nwipe and ShredOS options. For example:
+
+```bash
+menuentry 'ShredOS Secure Wipe' {
+    linux /boot/vmlinuz root=/dev/ram0 rw init=/init nwipe-method="dodshort" \
+    nwipe-verify=1 skip-bootdisk=1 autonuke=1 autologout-time=300 \
+    certfile="/mnt/usb/certificates/erase_cert.pdf"
+    initrd /boot/initrd.img
+}
+```
+
+### 3.3 Explanation of Key Parameters
+
+| Parameter         | Description                                                   |
+|-------------------|---------------------------------------------------------------|
+| `nwipe-method`    | Select wipe algorithm (e.g., dodshort, gutmann, zeros, random) |
+| `nwipe-verify`    | Enable verification pass after wipe                            |
+| `skip-bootdisk`   | Prevent wipe of boot media disk                                |
+| `certfile`        | Path to save erasure certificate automatically                 |
+| `autonuke`        | Start wiping unattended after boot (1 = enable)               |
+| `autologout-time` | Time in seconds till automatic logout after inactivity        |
+
+### 3.4 Persistence vs. One-Time Overrides
+
+- **Persistent Changes:** Edit grub.cfg on your boot media so changes apply every boot.
+- **One-time Changes:** Use grub menu at boot prompt to temporarily edit kernel parameters.
+
+
+---
+
+## 4. Automating Specific Behaviors
+
+### 4.1 Autonuke Mode
+
+Autonuke triggers an immediate wiping process on all selected drives without user input.
+
+Example kernel parameter:
+
+```bash
+autonuke=1
+```
+
+**Best Practice:** Always use `skip-bootdisk=1` or similar to exclude your boot media.
+
+### 4.2 Automatic Logout and Shutdown
+
+Control the session length and automatic logout behavior using the `autologout-time` parameter. This helps in unattended environments to ensure system resets after completion.
+
+Example:
+
+```bash
+autologout-time=300
+```
+
+This logs out idle users after 5 minutes.
+
+### 4.3 Persistent Logging and Certificates
+
+Enable automatic saving of logs and certificates in a specified path to ensure post-wipe auditing:
+
+```bash
+logfile="/mnt/usb/logs/wipe.log"
+certfile="/mnt/usb/certs/cert.pdf"
+```
+
+Ensure the target directory is writable and mounted early during boot.
+
+### 4.4 Passing Nwipe Specific Options
+
+You can pass any supported Nwipe option via kernel parameters:
+
+- `nwipe-passcount=3` — set number of overwrite passes
+- `nwipe-prng=hardware` — select PRNG type
+- `nwipe-exclude="sda1,sdb2"` — exclude specific drives or partitions
+
+Refer to the [Nwipe options page](https://nwipe.org) for full details.
+
+### 4.5 Device Exclusion
+
+To prevent wiping boot or system drives, specify exclusions explicitly:
+
+```bash
+skip-bootdisk=1
+nwipe-exclude="sda"
+```
+
+---
+
+## 5. Best Practices
+
+- **Always double-check exclusions** to avoid wiping your boot media or important drives.
+- **Test kernel parameter changes** using temporary grub menu edits before persistently modifying grub.cfg.
+- **Backup existing grub.cfg** before editing.
+- **Use persistent overlays** if you manage many configuration changes.
+- **For headless or network setups**, automate log exports and certificate storage.
+
+---
+
+## 6. Troubleshooting
+
+### 6.1 Wipe Does Not Start Automatically
+
+- Verify `autonuke=1` is set in kernel parameters.
+- Confirm `skip-bootdisk=1` does not exclude the wipe target drives by mistake.
+- Review the boot log (`dmesg` or serial console) for errors parsing parameters.
+
+### 6.2 Certificates or Logs Not Saving
+
+- Check if the target save path (USB mount or network share) is properly mounted.
+- Confirm permissions allow writing.
+- Validate `certfile` and `logfile` paths in kernel parameters are correct and writable.
+
+### 6.3 Kernel Parameters Not Being Picked Up
+
+- Ensure grub.cfg edits are to the active boot media.
+- If using Ventoy, confirm grub.cfg is properly patched within the Ventoy image.
+- Boot manually with the updated parameters via grub menu to isolate config file issues.
+
+---
+
+## 7. Advanced Usage
+
+### 7.1 Buildroot Integration
+
+Buildroot manages ShredOS’s build, including kernel parameters injection into grub.cfg. Customize via the Buildroot configuration to bake command-line parameters into bootloader.
+
+### 7.2 Overlay Filesystem
+
+Use root filesystem overlays to persist configuration files or scripts automating nwipe or cert handling beyond kernel parameters.
+
+### 7.3 Remote and Headless Operation
+
+Integrate with telnet access or network boot for remote wipe automation (see related guides).
+
+---
+
+## 8. Example grub.cfg Snippet with Automation
+
+```bash
+menuentry 'ShredOS Auto Wipe' {
+    set root=(hd0,1)
+    linux /boot/vmlinuz root=/dev/ram0 rw init=/init nwipe-method="dodshort" \
+          nwipe-verify=1 skip-bootdisk=1 autonuke=1 autologout-time=300 \
+          certfile="/mnt/usb/certs/wipe_cert.pdf" logfile="/mnt/usb/logs/wipe.log"
+    initrd /boot/initrd.img
+}
+```
+
+---
+
+## 9. Additional Resources
+
+- [ShredOS Quickstart Guide](/guides/getting-started-workflows/quickstart-guide)
+- [Configuring ShredOS Options](../getting-started/first-use-configuration/configuring-options)
+- [Automating disk wipes with nwipe](../guides/advanced-usage-customization/nwipe-options-customization)
+- [Troubleshooting common issues](../getting-started/troubleshooting-advanced/common-issues)
+- [Building ShredOS from source](../getting-started/installation-setup/build-from-source)
+
+---
+
+## 10. Summary
+
+Automating ShredOS wiping and changing default options is primarily done by setting kernel command-line parameters in grub.cfg. This allows users to run unattended wipes (autonuke), set custom overwrite methods, enable verification and logging, control session timeouts, and specify exclusion rules and certificate output paths. These powerful mechanisms enable ShredOS to scale in professional and batch environments while maintaining security and audit compliance.
+
+---
+
+<Tip>
+Always review and verify your grub.cfg edits on a non-critical system before deploying automation widely.
+</Tip>
+
+<Tip>
+Use the `make savedefconfig` and Buildroot configuration options to persist your customized kernel parameters through image rebuilds.
+</Tip>
+
+<Tip>
+For headless or network wipe environments, combine these methods with remote access and network log export workflows.
+</Tip>
+
+---
+
+<Check>
+Double-check your device exclusions to avoid accidental wiping of the boot media or essential data drives.
+</Check>
+
+<Check>
+Confirm your destination for logs and certificates is properly mounted and writable to ensure audit data is preserved.
+</Check>
+
+---

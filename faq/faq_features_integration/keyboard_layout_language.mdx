@@ -1,0 +1,170 @@
+---
+title: "How can I change the keyboard layout or language?"
+description: "Explains how to temporarily or persistently configure the keyboard layout using loadkeys and kernel command line options, crucial for users with non-US keyboards."
+---
+
+# How to Change the Keyboard Layout or Language in ShredOS
+
+Changing the keyboard layout or language is essential for users relying on keyboard input in non-US locales or with different character sets. This documentation explains how to temporarily switch keyboard layouts during a live session as well as how to persistently configure the keyboard layout using kernel command-line options and loadkeys. These steps ensure that keyboard input matches your physical keyboard and preferred language settings in ShredOS.
+
+---
+
+## Understanding Keyboard Layout Configuration
+
+ShredOS, designed for secure disk erasure, defaults to the US English keyboard layout. If your physical keyboard differs or you need input support for another language, you must adjust the keyboard layout accordingly. This adjustment affects how keys are interpreted by the system, mapping physical keys to the correct characters.
+
+
+### Why Change Keyboard Layout?
+- Your keyboard uses a different language or regional layout (e.g., German QWERTZ, French AZERTY).
+- You need to input special characters or accented letters.
+- You want to prevent input errors caused by mismatched layouts, especially during sensitive actions like disk wipe confirmation.
+
+---
+
+## Temporary Keyboard Layout Change Using `loadkeys`
+
+The `loadkeys` utility changes the keyboard layout for the current live session without requiring a reboot. This is the quickest way to switch keyboard layouts temporarily.
+
+### Steps to Change Keyboard Layout Temporarily:
+
+<Steps>
+<Step title="Open a Virtual Terminal">
+Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F2</kbd> (or <kbd>F3</kbd>–<kbd>F6</kbd>) to open a text console.
+</Step>
+<Step title="Identify the Desired Keymap">
+Common keymap files are stored under `/usr/share/keymaps/`. For example:
+
+- `de-latin1.map.gz` for German
+- `fr-latin1.map.gz` for French
+- `es-latin1.map.gz` for Spanish
+
+You can list available keymaps with:
+
+```bash
+ls /usr/share/keymaps/**/*.map.gz
+```
+</Step>
+<Step title="Load the Keymap">
+Execute loadkeys with the full path or name:
+
+```bash
+loadkeys de-latin1
+```
+
+This switches the active keyboard layout immediately.
+</Step>
+<Step title="Return to the Graphical Session">
+Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F1</kbd> (or <kbd>F7</kbd>) to switch back to the main UI screen.
+</Step>
+</Steps>
+
+
+<Tip>
+Temporary changes last only until reboot. Use persistent configuration to retain settings across reboots.
+</Tip>
+
+---
+
+## Persistent Keyboard Layout Configuration via Kernel Command Line
+
+To make keyboard layout changes persist across boots and early in the system startup, configure the kernel command line parameters within the bootloader `grub.cfg`. This approach ensures that the correct keyboard layout is active from the start of the ShredOS session.
+
+### Key Kernel Parameters for Keyboard Layout:
+
+- `kbd`: Sets the keyboard layout code (e.g., `us`, `de`, `fr`).
+- `locale`: Sets the system locale (can help with language and regional formats, including keyboard).
+
+### Example Edited `grub.cfg` Entry:
+
+```bash
+linux /boot/vmlinuz-... root=... rw kbd=de locale=de_DE.UTF-8
+```
+
+This example boots with a German keyboard layout and locale.
+
+### Applying Persistent Keyboard Settings:
+
+1. Mount the media or partition where `grub.cfg` resides.
+2. Open `grub.cfg` with a text editor.
+3. Locate the ShredOS boot entry and find the `linux` line.
+4. Append or modify the kernel command line with `kbd=` and/or `locale=` parameters.
+5. Save changes and reboot the system.
+
+
+<Warning>
+Incorrect kernel parameters or syntax errors in `grub.cfg` can prevent booting. Always keep a backup of the original file before editing.
+</Warning>
+
+---
+
+## Examples of Common Keyboard Layout Codes
+
+| Language / Country | Kernel Keyboard Code |
+|--------------------|----------------------|
+| US English         | us                   |
+| German             | de                   |
+| French             | fr                   |
+| Spanish            | es                   |
+| Italian            | it                   |
+| Russian            | ru                   |
+| Japanese           | jp                   |
+
+For a full list, refer to your system's keymaps or consult [X keyboard configuration documentation](https://www.x.org/releases/current/doc/xorg-docs/input/XKB-Config.html).
+
+---
+
+## Verifying Your Keyboard Layout
+
+After booting with the new configuration or loading a keymap via `loadkeys`:
+
+- Test key functionality by typing in a text field or console.
+- Ensure special characters or language-specific keys produce expected input.
+
+If unexpected characters appear, re-check the layout code or loadkeys file name.
+
+---
+
+## Troubleshooting Keyboard Layout Issues
+
+<AccordionGroup title="Common Keyboard Layout Issues and Resolutions">
+<Accordion title="Keyboard keys produce wrong characters after boot">
+- Verify that the `kbd=` parameter matches your keyboard layout.
+- Confirm `grub.cfg` edits were saved and applied properly.
+- Use a live terminal (`loadkeys`) to test temporary alternative layouts.
+</Accordion>
+<Accordion title="loadkeys command returns ‘No such file or directory’">
+- Double-check the keymap file name and path.
+- List available keymaps with `ls /usr/share/keymaps/**/*.map.gz`.
+- Ensure the `kbd` package and related files are included in your build configuration.
+</Accordion>
+<Accordion title="Keyboard layout resets after reboot">
+- Remember temporary `loadkeys` changes do not persist.
+- Use persistent kernel command-line settings.
+- Create or modify buildroot overlays to embed persistent configurations if building custom ISOs.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices for Keyboard Layout Configuration
+
+- **Validate before wiping:** Ensure keyboard input works correctly before confirming disk erasure to avoid input errors.
+- **Use persistent configuration for repeated use:** For regular ShredOS deployments, use kernel boot parameters to automate keyboard layout.
+- **Backup `grub.cfg` before edits:** Prevent boot failures by saving original bootloader configs.
+- **Test layouts in live sessions:** Temporarily load layouts with `loadkeys` to verify choice.
+
+---
+
+## Additional Resources
+
+- [ShredOS Configuring Keyboard Layout and Locale Guide](../guides/advanced-usage-customization/keyboard-locale-persistence)
+- [X Keyboard Configuration Documentation](https://www.x.org/releases/current/doc/xorg-docs/input/XKB-Config.html)
+- [Buildroot Manual on Locale and Keymap Setup](https://buildroot.org/downloads/manual/manual.html#_locales_and_keymaps)
+
+---
+
+By following these instructions, you can confidently configure the keyboard layout and language in ShredOS, enhancing usability and reducing input errors during critical disk wiping operations.
+
+---
+
+_Last updated: June 2024_

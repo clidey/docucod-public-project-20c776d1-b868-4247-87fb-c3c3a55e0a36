@@ -1,0 +1,158 @@
+---
+title: "Troubleshooting Common Issues"
+description: "Detailed solutions to frequently encountered problems: boot failures on legacy vs UEFI systems, USB/media not recognized, hangs on startup, build errors, mtools issues, and font/keyboard/display mismatches (including on MacBooks)."
+---
+
+# Troubleshooting Common Issues
+
+This page provides practical solutions to frequently encountered problems during the use of Buildroot, including issues with boot failures on legacy vs UEFI systems, missing or unrecognized USB/media devices, system hangs on startup, build errors, mtools problems, and font/keyboard/display mismatches (including on MacBooks).
+
+---
+
+## 1. Boot Failures on Legacy vs UEFI Systems
+
+### Symptoms
+- System fails to boot from installation media (USB, CD/DVD).
+- Firmware ignores boot media or displays error messages.
+
+### Solutions
+1. **Verify Boot Mode Compatibility:**
+    - Check if your system firmware supports legacy BIOS or UEFI boot.
+    - Download the appropriate Buildroot image for **BIOS (legacy)** or **UEFI** systems.
+2. **Prepare Bootable Media Correctly:**
+    - Follow [Create Bootable USB or CD/DVD](/getting-started/installation-setup/create-bootable-media) precisely.
+    - Ensure the media uses a partition table and filesystem compatible with target boot mode.
+3. **UEFI Boot Tips:**
+    - Enable **UEFI boot** in firmware settings.
+    - Disable Secure Boot unless supported.
+    - Use images with EFI System Partition (ESP) correctly formatted.
+4. **Legacy BIOS Boot Tips:**
+    - Verify BIOS is set to legacy or CSM enabled mode.
+    - Use images designed with BIOS boot support.
+
+---
+
+## 2. USB or Media Not Recognized
+
+### Symptoms
+- Bootable USB or optical media not detected.
+- USB storage devices do not appear on the target.
+
+### Solutions
+1. **Hardware Compatibility Check:**
+    - Confirm your hardware and USB controller chipset are supported (see [System Requirements & Supported Hardware](/getting-started/introduction-overview/supported-hardware-and-requirements)).
+2. **Verify Media Creation:**
+    - Recreate boot media using verified methods ([Create Bootable USB or CD/DVD](/getting-started/installation-setup/create-bootable-media)).
+    - Try alternative USB ports (some ports may be USB 3.0 only or disabled).
+3. **Check Firmware Settings:**
+    - Enable legacy USB support if available.
+    - Disable Fast Boot that may skip USB initialization.
+4. **Check Kernel Hardware Support:**
+    - Customize Buildroot to include necessary USB storage drivers.
+    - Use `usb-storage` and `xhci-hcd` drivers if applicable.
+
+---
+
+## 3. System Hangs on Startup
+
+### Symptoms
+- System gets stuck at messages like "Starting network..."
+- No login prompt appears on serial console or display.
+
+### Solutions
+1. **Boot Process Troubleshooting:**
+    - Confirm via serial console if any messages appear beyond "Starting network...".
+    - This usually indicates system is running but no shell started.
+2. **Enable Getty on Serial Console:**
+    - In Buildroot configuration, go to **System Configuration**.
+    - Enable **Run a getty (login prompt) after boot**.
+    - Set appropriate serial device and baud rate in **getty options**.
+    - This configures `/etc/inittab` for console login.
+3. **Check for Network Daemon Issues:**
+    - Disable or properly configure network services if hanging is related to network.
+4. **If Using systemd:**
+    - Verify that systemd services are running and not stuck.
+
+---
+
+## 4. Build Errors
+
+### Common Causes
+- Missing or incompatible host tools (e.g., `gcc`, `make`, `perl`).
+- Incorrect or incomplete toolchain configuration.
+- Dependencies missing on the build host.
+- Source download or patch errors.
+
+### Solutions
+1. **Verify Host Prerequisites:**
+    - Confirm mandatory host packages are installed (see [System Requirements](/getting-started/introduction-overview/supported-hardware-and-requirements#requirement-mandatory)).
+    - For optional but recommended packages, install Python, graphviz, etc.
+2. **Check Toolchain Settings:**
+    - If using the internal toolchain, ensure Buildroot builds it successfully.
+    - If using an external toolchain, ensure it's correctly set up and compatible.
+3. **Inspect Logs:**
+    - Read the build log for the failing package under `output/build/<package>/`.  Look for error messages.
+4. **Re-Download Sources:**
+    - Run `make source` to download all sources afresh.
+    - Check network connectivity and mirror sites.
+5. **Verify Patch Applicability:**
+    - Ensure all patches apply cleanly. Remove stale `.rej` patch reject files.
+    - Check [Adding project-specific patches and hashes](#9_8).
+6. **Force Clean Rebuild:**
+    - Use `make clean all` to avoid partial corrupted builds.
+
+---
+
+## 5. Mtools Issues
+
+### Symptoms
+- Errors related to `mtools` command usage during build or runtime.
+- Drive labeling or access errors with FAT filesystems.
+
+### Solutions
+1. **Confirm mtools Package Enabled:**
+    - Ensure `mtools` is enabled in Buildroot (target or host as needed).
+2. **Verify FAT Filesystem Parameters:**
+    - Check FAT volume configurations using `mkfs.fat` with correct options.
+3. **Use Correct Device Mapping:**
+    - Configure mtools with appropriate drive letters and paths.
+4. **Patch or Update mtools:**
+    - Apply fixes as needed for specific hardware; check Buildroot patches.
+
+---
+
+## 6. Font, Keyboard, and Display Mismatches (Including on MacBooks)
+
+### Symptoms
+- Incorrect keyboard layout or key mapping.
+- Display font too small, unreadable UI.
+- Screen resolution issues on Macs or other systems.
+
+### Solutions
+1. **Keyboard Layout Configuration:**
+    - Configure `loadkeys` or keyboard settings in Buildroot (see [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options)).
+    - Use `loadkeys <layout>` in shell or add to init scripts.
+2. **Font Size and Resolution:**
+    - Adjust font size by configuring frame buffer console fonts or virtual terminal fonts.
+    - Refer to [Changing Keyboard Layout and System Locale](/guides/advanced-usage-customization/keyboard-locale-persistence).
+3. **Workarounds for MacBooks:**
+    - Use known compatible configurations for Macs.
+    - Adjust resolution and font size based on hardware detection.
+4. **Use Virtual Terminals:**
+    - Access alternate TTYs (e.g., Ctrl+Alt+F2) to check text display.
+
+---
+
+## Additional Resources and Next Steps
+
+- [System Requirements & Supported Hardware](/getting-started/introduction-overview/supported-hardware-and-requirements)
+- [Troubleshooting Boot and Disk Detection Issues](/guides/advanced-usage-customization/troubleshooting-and-recovery)
+- [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options)
+- [Adding project-specific patches and hashes](#9_8)
+- [Buildroot Manual](http://buildroot.org/manual.html)
+
+---
+
+If problems remain unresolved, consider engaging with the Buildroot community through mailing lists or IRC channels.
+
+---

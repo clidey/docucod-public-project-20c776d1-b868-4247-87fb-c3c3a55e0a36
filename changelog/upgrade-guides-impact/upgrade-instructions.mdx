@@ -1,0 +1,143 @@
+---
+title: "Upgrade Instructions & Best Practices"
+description: "Step-by-step advice for upgrading ShredOS—covering how to safely transition boot media, retain configurations, and adopt new automation or integration features. Learn what needs special attention in each upgrade scenario."
+---
+
+# Upgrade Instructions & Best Practices
+
+Welcome to the definitive guide for upgrading your ShredOS system.
+
+Upgrading your ShredOS installation requires careful steps to ensure continuity in your disk erasure workflows, protection of existing configurations, and smooth adoption of new features. This guide walks you through safe migration of boot media, preservation tips, automation adoption, and what to watch for during various upgrade scenarios.
+
+## 1. Preparing Your Upgrade
+
+Before initiating any upgrade, it's essential to understand your current setup:
+
+- **Identify Boot Media:** Confirm the media type (USB stick, CD/DVD, network boot) currently used to boot ShredOS.
+- **Backup Configurations:** Preserve your existing configurations and overlays.
+- **Check Compatibility:** Verify that the new ShredOS version supports your hardware and boot methods.
+
+### Best practices
+
+- **Create a Backup of Boot Media:** Before upgrade, make a byte-for-byte clone of your current boot media. This ensures rollback is possible if issues arise.
+- **Retain Configuration Files:** If you use custom kernel parameters or `nwipe` settings in grub.cfg or overlays, save these files externally.
+- **Verify Download Integrity:** Always verify the SHA256 checksums of the new ShredOS image before writing to boot media.
+
+## 2. Upgrading Boot Media Safely
+
+Depending on your boot media type, the upgrade steps vary:
+
+### 2.1 USB Boot
+
+1. Prepare new bootable media using the latest ShredOS image.
+2. Copy any persistent overlays or configuration files from the old USB to the new one.
+3. Make sure your bootloader entries (grub.cfg) carry forward your kernel command line customizations like automation flags, device exclusions, or logging options.
+4. Test the new media on a non-critical system before production deployment.
+
+### 2.2 CD/DVD Boot
+
+- Since CD/DVD images are typically read-only media, upgrade means burning a new disc with the updated image.
+- Preserve any persistent data separately, since CD/DVD disks cannot be overlaid.
+
+### 2.3 Network Boot (PXE, iPXE)
+
+- Update your server-shared boot images with the latest ShredOS kernel and initramfs.
+- Retain any custom configurations or automation profiles on the server.
+
+## 3. Retaining and Migrating Configurations
+
+ShredOS configurations can be session-based or persistent via overlays.
+
+- **Persistent Overlays:** If you use rootfs overlays for storing your custom wipe scripts, keyboard layouts, or log paths, copy these overlays to the upgraded boot media or network server.
+- **Kernel Command-line Arguments:** Document your grub.cfg kernel parameter modifications, such as automation flags (`autonuke`), exclusion lists (`skip-bootdisk-dev`), language settings, etc., and apply them to your new bootloader configuration.
+
+<Tip>
+For users employing Buildroot to customize ShredOS, keep all board or package-specific configs (e.g. `linux.config`, `busybox.config`) in separate directories as per recommended directory structure. This makes re-applying configurations on new images straightforward.
+</Tip>
+
+## 4. Adopting New Automation and Integration Features
+
+Recent ShredOS upgrades may include new capabilities such as enhanced autonomous wiping, network export options, or logging customizations.
+
+- **Automation with Autonuke:** Review the new kernel parameters controlling unattended wiping. Update your grub.cfg accordingly.
+- **Output Logging and Certificates:** New methods may be available to export logs or certificate files to USB or network locations. Assess your existing workflow to integrate these improvements.
+- **Integration with PXE and Ventoy:** For environments using network boot or multi-boot USBs, review updated instructions emphasizing compatibility and configuration changes.
+
+## 5. Scenarios Demanding Special Attention
+
+Certain upgrade scenarios require additional considerations:
+
+### 5.1 Multi-Disk or Rack Server Environments
+
+- Verify that drive exclusion lists are intact and updated.
+- Test that parallel erasure features operate correctly with the new image.
+
+### 5.2 SSDs and NVMe Drives with Firmware-Level Erase
+
+- Validate firmware erase commands and utilities (`hdparm`, `nvme-cli`) are of compatible versions.
+- Confirm that drive freezing prevention steps are incorporated in scripts if modified.
+
+### 5.3 Headless or Remote Systems
+
+- Confirm telnet or network access services continue to function after upgrade.
+- Review new security advisories or config options related to remote access.
+
+## 6. Troubleshooting and Rollback
+
+Upgrades may occasionally introduce unexpected behaviors. For quick recovery:
+
+- Keep a backup of the previous boot media for rollback.
+- Use `make clean` and `make` with your Buildroot configuration to rebuild clean images if needed.
+- Review the common issues guide if hardware or boot problems arise post-upgrade.
+
+## 7. Upgrade Summary
+
+| Step                         | Action/Tip                                        |
+|------------------------------|-------------------------------------------------|
+| Backup                      | Clone current boot media before upgrade          |
+| Preserve Configs            | Save all kernel parameters and overlays          |
+| Prepare New Media           | Write new ShredOS image to new USB/CD/DVD        |
+| Migrate Configs             | Transfer overlays, update grub.cfg                |
+| Test                       | Boot new media on test systems                     |
+| Deploy                     | Replace old boot media after successful testing  |
+| Monitor                    | Check logs and certificates post-upgrade          |
+
+## 8. Additional Resources
+
+- [Buildroot Configuration Manual](https://buildroot.org/downloads/manual/manual.html#configure)
+- [ShredOS Quickstart Guide](../guides/getting-started-workflows/quickstart-guide)
+- [Advanced Usage & Customization](../guides/advanced-usage-customization/nwipe-options-customization)
+- [Certificate Generation and Log Exporting Workflows](../guides/certificates-logging-integration/certificate-generation-best-practices)
+- [Breaking Changes & Migrations Overview](../changelog/upgrade-guides-impact/breaking-changes-migrations)
+- [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues)
+
+---
+
+Upgrade your ShredOS responsibly by following these structured steps and embracing the new features to deliver efficient, compliant, and reliable secure disk erasure.
+
+If assistance is needed, consult the 'Where to Get Help' guide or join the Buildroot mailing list.
+
+---
+
+**Practical Tip:** Always run a test wipe with new media before deploying to a production environment to validate your configuration and detect any incompatibilities early.
+
+**Common Pitfall:** Avoid reusing old boot media without proper cleanup, as residual configuration files may conflict with new version expectations.
+
+**User Flow Summary:**
+
+1. Backup current environment
+2. Download and prepare new boot media
+3. Migrate configuration and overlays
+4. Test boot and wiping functionality
+5. Deploy new media
+6. Monitor logs and outputs
+
+---
+
+**Troubleshooting:**
+
+- Missing boot prompt after upgrade? Check `getty` settings under System configuration > Run a getty after boot.
+- USB device not recognized? Review USB adapter compatibility and power issues.
+- Automation not triggering? Ensure kernel command line parameters are correctly set in grub.cfg.
+
+For a comprehensive list of issues, visit the Troubleshooting documentation.

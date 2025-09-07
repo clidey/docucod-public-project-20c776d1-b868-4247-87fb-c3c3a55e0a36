@@ -1,0 +1,143 @@
+---
+title: "What is ShredOS?"
+description: "Learn the purpose of ShredOS as a USB/CD-bootable Linux-based disk eraser featuring nwipe, its advantages over legacy solutions, and what problem it solves for modern hardware security and data destruction."
+---
+
+# What is ShredOS?
+
+ShredOS is a USB/CD-bootable Linux-based disk eraser specifically designed to meet the needs of secure data destruction on modern hardware. At its core, ShredOS integrates `nwipe` — a reliable and actively maintained fork of the legacy `dwipe` utility — providing comprehensive disk wiping capabilities with a user-friendly interface and advanced options.
+
+---
+
+## Purpose and Core Functionality
+
+ShredOS addresses the critical problem of securely erasing data from storage devices, which has become increasingly important given evolving hardware security standards and data privacy regulations. Unlike legacy tools such as DBAN or dwipe, which are outdated and lack support for many modern devices and interfaces, ShredOS provides a robust, current, and practical solution.
+
+By booting ShredOS from a USB flash drive or CD/DVD media, users can launch a minimal Linux environment equipped with disk erasure utilities without installing or modifying any operating system on the host computer. This makes ShredOS ideal for IT administrators, refurbishers, and anyone needing to sanitize hard drives safely and efficiently.
+
+---
+
+## Key Features and Advantages
+
+- **Linux-Based and Open Source:** ShredOS is built on a Linux foundation via Buildroot, allowing seamless hardware compatibility and ease of customization.
+
+- **Bootable Media:** Generates a USB or CD/DVD boot image with integrated GRUB bootloader configuration, enabling flexible deployment.
+
+- **Modern Tooling with nwipe:** Uses the actively supported `nwipe` erasure utility, compatible with a wide range of disk types and wipe methods.
+
+- **Improved Hardware Support:** Designed for x86_64 and i686 platforms, supporting both BIOS and UEFI boot modes.
+
+- **Custom Bootloader:** Bootloader (`grub.cfg`) is tuned for quiet, immediate launch into ShredOS erasure mode.
+
+- **Integration and Extensibility:** Easily extended and customized via Buildroot overlays, post-image scripts, kernel configs, and more.
+
+---
+
+## What Problem Does ShredOS Solve?
+
+Modern organizations need to ensure that sensitive data on decommissioned or repurposed storage drives is unrecoverable. Legacy wipe solutions often fall short for newer hardware, firmware commands (e.g., SSD firmware erase), or lack critical updates and flexibility.
+
+ShredOS fills this gap by delivering:
+
+- **Reliable and Secure Erasure:** Multiple erasure algorithms with verification to ensure drives are effectively sanitized.
+
+- **Hardware Compatibility:** Support for a broad spectrum of drives, including HDDs, SSDs, and NVMe devices.
+
+- **Convenience and Safety:** Bootable, standalone environment eliminating the need for OS installation or manipulation.
+
+- **Maintainability:** Open infrastructure managed through Buildroot facilitates easy updates and community contributions.
+
+---
+
+## Technical Preparation
+
+ShredOS is built and configured via Buildroot, leveraging an internal or external cross-compilation toolchain to assemble {
+}a minimal Linux system. It uses the GRUB bootloader configured for minimal delay and automatic launch.
+
+Example key configuration aspects include:
+
+- Target architecture flags set for x86_64 while supporting legacy i686.
+- Inclusion of essential GNU utilities and `nwipe` package for disk wiping.
+- Init system based on SYSV init for simplicity and reliability.
+- Custom overlay filesystem for ShredOS branding and additional configs.
+- Kernel configured with device drivers appropriate for broad hardware support.
+
+The final image consists of a partitioned disk image containing a VFAT boot partition with bootloader, kernel, and ShredOS assets, laid out for compatibility with common boot scenarios.
+
+---
+
+## How ShredOS Compares to Legacy Solutions
+
+Legacy erasure tools such as DBAN or dwipe provided foundational secure wiping but have not kept pace with modern hardware and firmware developments. ShredOS offers:
+
+- Active maintenance and enhancements through its use of `nwipe`.
+- Support for UEFI alongside BIOS booting.
+- A more flexible, extensible platform based on Buildroot rather than outdated Linux distributions.
+- Improved user experience with immediate boot and wipe initiation.
+- Advanced wipe options supporting a variety of drive types and security needs.
+
+---
+
+## Bootloader Configuration
+
+ShredOS employs GRUB for boot management, using a minimal `grub.cfg` file optimized for an instant launch into the erasure tool:
+
+```grub
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3
+}
+```
+
+This ensures a streamlined boot process with no user interaction delay.
+
+---
+
+## Summary
+
+ShredOS is an efficient, Linux-based disk erasure solution bootable from USB or CD, leveraging modern tools and flexible configuration. It securely addresses modern data destruction requirements on contemporary hardware, surpassing the limitations of legacy tools.
+
+---
+
+## Additional Reading and Next Steps
+
+- Refer to the Buildroot User Manual for understanding the build and configuration process.
+- Explore the 'Building ShredOS from Source' guide to customize or rebuild ShredOS.
+- Review the 'Boot Methods & System Integration' documentation for deployment on different hardware.
+- Consult the 'Quickstart Guide' for immediate operational instructions.
+- Check 'Troubleshooting Common Issues' for handling boot or disk detection problems.
+
+---
+
+## Practical Tips
+
+- When customizing ShredOS, use root filesystem overlays and post-image scripts located within the `board/shredos/` directory for persistent modifications.
+- Keep backup copies of your `grub.cfg` and kernel configuration files before editing.
+- Test images on virtual machines or dedicated test hardware to verify compatibility.
+
+---
+
+## Troubleshooting
+
+If you encounter issues booting ShredOS:
+
+- Verify that your system supports booting from the selected media type (UEFI vs BIOS).
+- Check that the boot media was written correctly; re-image if necessary.
+- Ensure device detection is working; diagnostics tools included in ShredOS can help.
+
+If wiping does not start or drives are not detected, confirm that kernel drivers and tools are correctly configured and included in your build.
+
+---
+
+## References
+
+- [Buildroot Manual - Buildroot Configuration](https://buildroot.org/downloads/manual/manual.html#configure)
+- [ShredOS GitHub Repository](https://github.com/PartialVolume/shredos.x86_64)
+- [nwipe Utility](https://github.com/martijnvanbrummelen/nwipe)
+- [GRUB Documentation](https://www.gnu.org/software/grub/manual/grub/grub.html)
+
+---
+
+*Generated by ShredOS Build System*

@@ -1,0 +1,207 @@
+---
+title: "Prerequisites Checklist"
+description: "Go through a precise checklist to ensure you have all necessary hardware, tools, and software installed (including parted, mtools, build-essential, etc. for source builds) prior to setup or running ShredOS."
+---
+
+# Prerequisites Checklist
+
+Before beginning your setup or build process with Buildroot (the tool underpinning ShredOS), ensure your system has all required hardware, software tools, and dependencies properly installed and configured. This checklist is your gateway to a smooth build experience and reliable ShredOS deployment.
+
+---
+
+## 1. Supported Systems
+
+- **Operating System:** Linux is required as the host platform to run Buildroot. Confirm you have a compatible Linux distribution.
+- **Architecture Compatibility:** Buildroot supports various CPU architectures (e.g., x86_64, ARM variants). Confirm your target system's CPU architecture to select appropriate settings and toolchains.
+
+## 2. Mandatory Host Tools and Packages
+
+Buildroot expects several essential tools and utilities to be installed on your host system. These are critical for proper build orchestration.
+
+- Build and system utilities:
+  - `which`
+  - `sed`
+  - `make` (version 3.81 or newer)
+  - `binutils`
+  - `gcc` (version 4.8 or newer)
+  - `g++` (version 4.8 or newer)
+  - `bash`
+  - `patch`
+  - `gzip`
+  - `bzip2`
+  - `perl` (version 5.8.7 or newer)
+  - `tar`
+  - `cpio`
+  - `unzip`
+  - `rsync`
+  - `file` (ensure it is located at `/usr/bin/file`)
+  - `bc`
+  - `findutils`
+
+- Source fetching tool:
+  - `wget`
+
+> **Tip:** On Debian/Ubuntu systems, installing the `build-essential` package simplifies meeting the build tools requirements.
+
+## 3. Optional but Recommended Packages
+
+Though not mandatory for a basic build, these tools enable enhanced features and smoother configuration:
+
+- **Python:** Version 2.7 or newer (typically for legal-info and graph generation tools)
+- **Configuration interface dependencies:** For advanced configuration UIs
+  - `ncurses5` (for `menuconfig` interface)
+  - `qt5` (for Qt-based `xconfig` interface)
+  - `glib2`, `gtk2`, and `glade2` (for GTK-based `gconfig` interface)
+- **Version control clients:** If packages use version control for sources
+  - `git`
+  - `mercurial`
+  - `subversion`
+  - `cvs`
+  - `bazaar`
+  - `curl`
+  - `scp`
+  - `sftp`
+- **Java tools:** Only if Java packages are to be built
+  - `javac`
+  - `jar`
+- **Documentation generators:** If building documentation
+  - `asciidoc` (version 8.6.3 or newer)
+  - `w3m`
+  - `dblatex` (for generating PDF manuals)
+- **Graphing tools:** For dependency and build time graphs
+  - `graphviz` (provides `dot` tool)
+  - `python-matplotlib`
+- **Package statistics tools:**
+  - `python-aiohttp`
+
+---
+
+## 4. Build Environment Configuration
+
+Before you launch your first build:
+
+### Establish User Permissions
+
+- It is critical to build and configure Buildroot as a **non-root user** to avoid potential security risks and system misconfigurations.
+
+### Environment Variables (Optional)
+
+You may override or augment Buildroot behaviors using environment variables:
+
+| Variable         | Purpose                                                       |
+|------------------|---------------------------------------------------------------|
+| `HOSTCC`         | Specify host C compiler (e.g., gcc)                           |
+| `HOSTCXX`        | Specify host C++ compiler                                     |
+| `UCLIBC_CONFIG_FILE` | Path to a custom uClibc config file for internal toolchain   |
+| `BUSYBOX_CONFIG_FILE`| Path to a custom BusyBox config file                         |
+| `BR2_CCACHE_DIR` | Directory for compiler cache (with ccache enabled)           |
+| `BR2_DL_DIR`     | Directory to store all downloaded source tarballs and files  |
+| `BR2_GRAPH_OUT`  | Output format for generated dependency/build graphs (`pdf` or `png`) |
+
+### Example: Using environment overrides
+
+```bash
+make UCLIBC_CONFIG_FILE=path/to/uClibc.config BUSYBOX_CONFIG_FILE=$HOME/bb.config
+```
+
+### Toolchain Selection
+
+- Choose between **internal toolchain** (Buildroot builds cross-toolchain) or **external toolchain** (prebuilt cross-toolchain).
+- Internal toolchain offers higher customization but requires full rebuilds on change.
+- External toolchain is faster but depends on availability and consistency.
+- To build an external toolchain using Buildroot:
+
+  1. Configure Buildroot for your architecture with minimal target.
+  2. Run `make sdk` to generate a reusable SDK tarball.
+  3. Reference that SDK in your other Buildroot projects as a custom external toolchain.
+
+Refer to the Buildroot configuration UI for toolchain options.
+
+---
+
+## 5. Network and Source Control Tools (when applicable)
+
+- If building with packages requiring network or version control access, confirm installation of tools like:
+  - `git`, `cvs`, `mercurial`, `bazaar`, `curl`, `scp`, `sftp`, `subversion`
+
+> **Note:** Depending on your usage and packages selected, you might need to install only a subset of these tools.
+
+---
+
+## 6. System Build Tips and Best Practices
+
+- **Do not run builds as root** to minimize risks.
+- When changing fundamental configuration (toolchain, architecture), run a clean build (`make clean all`).
+- For offline build setups, use `make source` to pre-download all required sources.
+- You may build out of the Buildroot source tree by using `make O=<directory>`.
+- Limit concurrent build jobs or adjust with `BR2_JLEVEL` config for performance tuning.
+
+---
+
+## 7. Post-Prerequisite Checks
+
+Once the above requirements are met:
+
+- Ensure your environment paths (`PATH`) include necessary compiler and toolchain binaries.
+- Confirm that the required Buildroot utilities (like `make`, `patch`, `tar`) execute successfully.
+- Verify the presence of tools with commands like `which make`, `which gcc`, etc.
+- Check that your network and download utilities (`wget`, `git`) can access required external resources.
+
+---
+
+## 8. Troubleshooting Common Prerequisite Issues
+
+| Symptom                            | Cause                                   | Resolution                                                |
+|----------------------------------|-----------------------------------------|-----------------------------------------------------------|
+| Build commands not found          | Missing mandatory packages               | Install the required build tools                           |
+| Failures downloading source files | Network or missing download tools       | Verify network connectivity; install wget, git, curl       |
+| Build fails due to misconfigured toolchain | Inconsistent or missing toolchain | Configure toolchain correctly; consider using prebuilt toolchain |
+
+Refer to the [Buildroot FAQ and Troubleshooting section](../getting-started/troubleshooting-advanced/common-issues) if you encounter build difficulties.
+
+---
+
+# Quick Reference Commands
+
+```bash
+# Verify make version (should be >= 3.81)
+make --version
+
+# Check installed compiler versions
+gcc --version
+g++ --version
+
+# Check for wget
+wget --version
+
+# List Buildroot target definitions
+make list-defconfigs
+
+# Download all sources for offline build
+make source
+
+# Run Buildroot configuration interface (menuconfig example)
+make menuconfig
+
+# Start the full build
+make
+
+# Clean the build tree
+make clean
+```
+
+---
+
+# Additional Resources
+
+- [Buildroot System Requirements](../getting-started/introduction-overview/supported-hardware-and-requirements)
+- [Buildroot Quickstart Guide](../guides/getting-started-workflows/quickstart-guide)
+- [Buildroot General Usage and Environment Variables](../docs/manual/common-usage.adoc)
+- [Buildroot Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues)
+- [Buildroot Cross-Compilation Toolchain Configuration](../docs/manual/manual.text#_cross_compilation_toolchain)
+
+---
+
+**Prepare your environment now to avoid interruptions later. Once complete, proceed to create a configuration with `make menuconfig` and then build ShredOS.**
+
+---

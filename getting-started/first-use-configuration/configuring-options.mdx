@@ -1,0 +1,219 @@
+---
+title: "Configuring ShredOS (Options & Defaults)"
+description: "How to adjust persistent and session-based configuration by editing grub.cfg, kernel command line, keyboard maps (loadkeys), display resolution, and nwipe options. Explains making changes to nwipe default behavior, verification, and logging/cert."
+---
+
+# Configuring ShredOS (Options & Defaults)
+
+Configuring ShredOS allows you to tailor its behavior and environment to your precise needs. This guide covers how to modify ShredOS's persistent and session-based settings, including bootloader configuration, kernel command-line parameters, keyboard layouts, screen resolution, and crucial `nwipe` options—such as wiping defaults, verification, logging, and certificate generation.
+
+---
+
+## 1. Modify Bootloader Configuration (grub.cfg)
+
+The primary persistent configuration for ShredOS is controlled through its Grub bootloader configuration file, typically `grub.cfg`.
+
+### Steps to Edit grub.cfg:
+
+1. Locate the `grub.cfg` file on the boot media (USB drive, CD/DVD, or partition).
+2. Open the file in a text editor on a Linux host or any system that can edit text files.
+3. Identify the ShredOS boot entry you want to customize.
+4. Modify the kernel command line parameters by editing the `linux` line within the entry. These parameters control `nwipe` behavior and system options.
+5. Save changes and safely eject or update the boot media.
+
+### Example of Kernel Command Line in grub.cfg:
+
+```bash
+linux /boot/vmlinuz ... quiet nwipe=autonuke noreboot
+initrd /boot/initrd.img
+```
+
+- `nwipe=autonuke`: Automatically starts the wipe.
+- `noreboot`: Prevents automatic reboot after operation.
+
+<Tip>
+Make incremental changes and test boot to ensure your modifications are valid and do not prevent system startup.
+</Tip>
+
+---
+
+## 2. Kernel Command Line Parameters
+
+Kernel command-line options directly influence both ShredOS and the embedded `nwipe` erasure utility.
+
+### Key Options to Consider:
+
+- **nwipe Options:**
+  - `nwipe=autonuke`: Starts wiping immediately without user intervention.
+  - `nwipe=noblank`: Disables screen blanking during wipe.
+  - `nwipe=logfile=/path`: Specifies where to save logs.
+  - `nwipe=certificate=on`: Enables the generation of erasure certificates.
+  - `wipe-method=methodname`: Sets default wiping algorithms.
+
+- **Display & Locale:**
+  - `vga=ask`: Lets user select video mode at boot.
+  - `kbd=us` or `loadkeys=...`: Sets keyboard mapping.
+
+- **System Behavior:**
+  - `noreboot`: Prevents reboot after completion.
+  - `nogui`: Forces CLI only.
+
+<Tip>
+Always separate multiple kernel parameters by spaces.
+</Tip>
+
+---
+
+## 3. Keyboard Layout Configuration (loadkeys)
+
+ShredOS supports changing keyboard layout during boot through kernel parameters or additional utilities.
+
+### Configure Keyboard Layout Persistently:
+
+1. Edit `grub.cfg` to add or change the `loadkeys=` or `kbd=` parameter in the kernel command line.
+   - Example: `loadkeys=uk` for a UK keyboard.
+
+2. Alternatively, create or customize a keyboard map file and make sure it is loaded during init.
+
+### Change Keyboard Layout at Runtime:
+
+- Use the `loadkeys` command in the terminal to switch layouts temporarily.
+
+<Tip>
+To avoid confusion, set the keyboard layout that matches your physical keyboard.
+</Tip>
+
+---
+
+## 4. Adjusting Display Resolution
+
+ShredOS allows tuning the screen resolution and font size, which can be critical for usability.
+
+### Methods for Changing Display Resolution:
+
+1. **Using Kernel framebuffer modes:**
+   - Modify the kernel boot parameters in `grub.cfg` with `vga=` or `video=` options.
+   - Example: `vga=0x0317` sets 1024x768 with 16-bit color.
+
+2. **Use commands in init scripts or overlays:**
+   - Utilize tools like `fbset` to change resolution dynamically.
+
+3. **Changing font size:**
+   - Use kernel parameters like `consolefont=` or adjust terminal fonts in overlays.
+
+<Tip>
+If fonts appear too small or unreadable, increasing resolution or switching to a supported video mode will help.
+</Tip>
+
+---
+
+## 5. Customizing nwipe Options
+
+`nwipe` is the core disk wiping utility embedded in ShredOS. You can fine-tune its defaults and behavior.
+
+### Persistent Customization:
+
+- Edit the kernel command-line within `grub.cfg` to set default wipe behavior, e.g.: `nwipe=autonuke wipe-method=doD verification=on`
+
+### Key Configurable Parameters:
+
+| Parameter         | Description                                        | Example Value      |
+|-------------------|----------------------------------------------------|--------------------|
+| `wipe-method`     | Default erasure method (e.g., DoD, Gutmann)        | `doD`, `gutmann`    |
+| `verification`    | Enable or disable verification of erase            | `on`, `off`        |
+| `logfile`         | Path to the log file to save wipe logs              | `/tmp/nwipe.log`    |
+| `certificate`     | Enable erasure certificate generation               | `on`, `off`        |
+| `autonuke`        | Automatically start the wipe (skip menu)            |                    |
+
+### Example kernel line with nwipe:
+
+```bash
+linux /boot/vmlinuz ... nwipe=autonuke wipe-method=doD verification=on certificate=on
+```
+
+<Tip>
+Carefully check syntax and test to ensure `nwipe` runs as expected with your options.
+</Tip>
+
+---
+
+## 6. Logging and Certificate Configuration
+
+Reliable logging and certificate generation are essential for audit and compliance.
+
+### Enable Logging:
+
+- Use kernel parameters to specify a log file path, e.g., `nwipe=logfile=/mnt/usb/nwipe.log`.
+- Logs contain detailed wipe progress and errors.
+
+### Enable Certificate Generation:
+
+- Append `certificate=on` to the kernel command line.
+- Certificates validate that wipe was successful.
+
+### Saving Logs and Certificates:
+
+- Configure persistence by mounting USB or network shares.
+- Use filesystem overlays or post-image scripts to export results.
+
+<Tip>
+Ensure writeable media is connected and mounted properly before running to avoid lost logs.
+</Tip>
+
+---
+
+## 7. Session-Based Configuration (Temporary Changes)
+
+Certain configuration changes are applicable only to the current session:
+
+- Adjusting keyboard layout via `loadkeys` command at runtime.
+- Changing display resolution using `fbset` or console commands.
+- Running `nwipe` interactively to override defaults temporarily.
+
+Changes made this way are lost after reboot unless made permanent via overlays or configuration files.
+
+---
+
+## 8. Best Practices and Common Pitfalls
+
+- **Backup your grub.cfg** before editing.
+- Use descriptive comments within grub.cfg for clarity.
+- Avoid typos in kernel parameters; missing or malformed options may cause boot failure.
+- If unattended wipes are used (`nwipe=autonuke`), ensure your hardware is fully ready for unattended operation.
+- Make sure external storage for logs/certificates is properly mounted if used.
+
+---
+
+## 9. Troubleshooting Tips
+
+| Issue                      | Possible Cause                          | Solution                                  |
+|----------------------------|---------------------------------------|-------------------------------------------|
+| Keyboard layout not changed | Wrong loadkeys parameter or missing file | Verify layout name and availability; test with manual `loadkeys` |
+| Wipe does not start automatically | Missing or malformed `nwipe=autonuke` parameter | Confirm kernel cmdline syntax in grub.cfg   |
+| Logs not saved             | Storage not mounted, incorrect path     | Ensure mount points and write permissions  |
+| Certificates not generated | `certificate=on` missing                   | Add `certificate=on` to kernel parameters  |
+| Display unreadable         | Unsupported video mode or small fonts  | Adjust `vga=` or `video=` kernel params    |
+
+---
+
+## 10. Next Steps
+
+- Review the [Quickstart Guide: Securely Erasing a Disk](../guides/getting-started-workflows/quickstart-guide) for practical wiping workflows.
+- Learn to create custom overlays for persistent changes under [Customization & Extensibility](../overview/quick-feature-overview/extending-shredos).
+- Explore automation with autonuke options and network log export features.
+- Investigate troubleshooting common issues in [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues).
+
+---
+
+## Related Documentation
+
+- [What is ShredOS?](../getting-started/introduction-overview/what-is-shredos)
+- [Boot Methods & System Integration](../overview/architecture/booting-integration)
+- [Configuring ShredOS (Options & Defaults)](./configuring-shredos-options)
+- [Quickstart: Securely Erasing a Disk](../guides/getting-started-workflows/quickstart-guide)
+- [Common Issues and Troubleshooting](../getting-started/troubleshooting-advanced/common-issues)
+
+---
+
+_Last updated: 2024_
+

@@ -1,0 +1,141 @@
+---
+title: "Key Concepts and Terminology"
+description: "Master essential terms like 'secure erase', 'nwipe', 'PRNG', 'HPA/DCO', and 'autonuke'. Grasp the basics of disk wiping strategies, log/certificate outputs, and persistent/volatile configuration."
+---
+
+# Key Concepts and Terminology
+
+Master essential terms such as **secure erase**, **nwipe**, **PRNG**, **HPA/DCO**, and **autonuke**. Gain a solid understanding of disk wiping strategies, the generation and role of logs and erasure certificates, plus the differences between persistent and volatile configuration in ShredOS.
+
+---
+
+## 1. Understanding Core Terminology
+
+Before diving into usage, it's crucial to master these foundational terms and how they relate to secure disk erasure:
+
+- **Secure Erase**: An advanced process that overwrites data on a disk in a way that prevents recovery. This goes beyond standard deletion by making data unrecoverable.
+
+- **nwipe**: The core disk erasure utility at the heart of ShredOS, providing multiple wipe methods and automation capabilities.
+
+- **PRNG (Pseudorandom Number Generator)**: Used during certain wipe methods to generate random data to overwrite disks securely. Reliable PRNGs ensure the randomness of these patterns.
+
+- **HPA/DCO (Host Protected Area / Device Configuration Overlay)**: Specialized disk regions that some drives use to hide data. ShredOS recognizes these areas to ensure wiping covers all accessible parts.
+
+- **Autonuke**: A mode within ShredOS for fully automated disk erasure without user interaction, suitable for scripted or mass wipe operations.
+
+- **Log and Certificate Outputs**: After a wipe, ShredOS can generate detailed logs and PDF certificates that serve as proof of erasure for audit and compliance.
+
+- **Persistent vs. Volatile Configuration**:
+  - *Persistent*: Configuration settings that survive across boots, usually set via overlay files or saved configs.
+  - *Volatile*: Temporary settings valid only during the current run, often passed via bootloader parameters or runtime options.
+
+---
+
+## 2. Disk Wiping Strategies
+
+### 2.1. Overview of Methods
+
+ShredOS supports a variety of wiping strategies designed to meet different security and speed requirements:
+
+- **Single Pass Zero or One Overwrite**: Simplest method, writing zeros or ones across the entire disk.
+
+- **DoD 7-Pass**: US Department of Defense standard with multiple overwriting passes and verification.
+
+- **Gutmann Method**: A 35-pass overwrite designed for older media with different encoding schemes.
+
+- **Firmware Secure Erase**: Leveraging drive firmware commands for quick and reliable internal erasure (especially for SSDs and NVMe).
+
+- **Random Pattern Wipes**: Using PRNG to overwrite with random data for unpredictability.
+
+
+### 2.2. Choosing the Right Method
+
+Consider disk type (HDD, SSD, NVMe), data sensitivity, and time constraints. For example, firmware erase if supported is fast and effective for SSDs, while DoD or Gutmann suits regulatory requirements for magnetic disks.
+
+---
+
+## 3. Output Files: Logs and Certificates
+
+ShredOS preserves detailed logs and optionally generates certificates after each wipe operation.
+
+- **Log Files**: Include detailed progress, start/end timestamps, per-drive status.
+  - Typically stored on USB devices or over network export.
+
+- **Erasure Certificates (PDF)**:
+  - Official proof that a disk has been securely erased.
+  - Include details such as serial numbers, method used, and time stamps.
+  - Critical for compliance with security policies and audits.
+
+### Tips for Managing Output
+
+- Use USB drives for easy retrieval.
+- Verify log presence post-wipe to confirm success.
+- Export logs via network only in trusted environments.
+
+---
+
+## 4. Configuration Basics
+
+### 4.1. Persistent Settings
+
+- Stored in configuration overlays or files.
+- Used to set default wipe methods, target devices, logging behaviors.
+- Survive system reboots.
+
+### 4.2. Volatile Settings
+
+- Passed at boot-time via kernel command line.
+- Override persistent config for one-time operations.
+- Ideal for testing or one-off wipes.
+
+---
+
+## 5. Practical Examples
+
+### Creating a Userspace Overlay for Persistent Config
+
+To persistently set a default wipe method, add a configuration file in a root filesystem overlay. For example:
+
+```bash
+/etc/shredos.conf
+# Default wipe method
+WIPE_METHOD=DoD7
+```
+
+### Running Autonuke for Fully Automated Wipe
+
+Autonuke mode can be enabled by passing a kernel boot parameter:
+
+```bash
+autonuke
+```
+
+This will erase all detected disks without user prompts.
+
+### Understanding HPA/DCO Awareness
+
+Prior to wiping, ShredOS detects if a disk has HPA or DCO areas active. It will expose these areas so wipes cover all accessible sectors.
+
+---
+
+## 6. Troubleshooting Tips
+
+- **Disk Not Detected**: Check if HPA/DCO areas are masking the disk, or verify firmware compatibility.
+- **Wipe Logs Missing**: Confirm USB device is inserted and writable.
+- **Autonuke Skips Drives**: Check kernel parameters and device inclusion/exclusion settings.
+- **Certificate Generation Failure**: Ensure PDF utilities are present and USB/network export destinations are accessible.
+
+---
+
+## 7. Next Steps
+
+- Explore the [Quickstart: Securely Erasing a Disk](../guides/getting-started-workflows/quickstart-guide) guide for hands-on wiping.
+- Consult the [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options) page to customize behavior.
+- Review advanced wipe methods in [Wiping SSDs and NVMe Drives Using Firmware Commands](../guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme).
+- Use [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues) for diagnosis support.
+
+---
+
+For detailed system build and packaging context, refer to the Buildroot documentation included with ShredOS source.
+
+---

@@ -1,0 +1,79 @@
+---
+title: "Latest Release Overview"
+description: "Discover what's new in the current ShredOS version: new features, improvements in disk erasure methods, user experience refinements, tool updates (such as nwipe and smartmontools), and any recent bug fixes. This page also highlights improvements in hardware support and deployment options."
+---
+
+# Latest Release Overview
+
+Explore the newest advancements in ShredOS, focusing on critical enhancements in secure disk erasure methods, user experience, hardware support, and tooling updates. This page offers a detailed look at improvements that help you achieve faster, more reliable wipes, streamlined operations, and greater compatibility across diverse environments.
+
+---
+
+## 1. Executive Summary
+
+The latest ShredOS release introduces refined disk erasure algorithms, enhanced hardware interaction via updated versions of `nwipe` and `smartmontools`, and key bug fixes addressing stability and usability issues. These changes elevate ShredOS’s capability in delivering secure, compliant, and efficient disk wiping, making it an indispensable tool for IT professionals managing sensitive data destruction.
+
+## 2. New Features and Enhancements
+
+### 2.1 Improved Disk Erasure Methods
+- Enhanced overwrite patterns in `nwipe` provide stronger data sanitization with optimized speed.
+- Added support for contemporary SSD firmware erase commands, improving wipe success and time efficiency on flash storage.
+- Verification routines refined to flag incomplete wipes earlier, ensuring higher confidence in erasure results.
+
+### 2.2 User Experience Refinements
+- Updated `nwipe` interface fixes layout glitches on lower resolution displays, improving accessibility.
+- Default wipe options adjusted for safer defaults, reducing risk of accidental wipe of boot media.
+- Autonuke mode now supports expanded device exclusion parameters, simplifying batch wipe management.
+
+### 2.3 Tool Updates
+- `nwipe` updated to latest stable version, incorporating upstream fixes and improved device detection.
+- `smartmontools` upgraded to enhance health diagnostics and support wider range of storage devices.
+- Enhanced logging capabilities allow more detailed certificates and export options, aiding in compliance audits.
+
+### 2.4 Hardware and Deployment Support
+- Expanded hardware compatibility, including newer USB-to-SATA bridge chipsets, reducing failures in drive detection.
+- Ventoy multi-boot support improvements for seamless integration in multi-boot USB environments.
+- PXE boot workflows refined for more reliable network boot in headless wipe scenarios.
+
+## 3. Bug Fixes and Stability Improvements
+- Resolved rare kernel panics during device scanning on certain BIOS/UEFI combinations.
+- Fixed certificate generation errors when using custom output paths.
+- Addressed erratic keyboard layout issues persisting across reboots.
+
+## 4. Deployment and Upgrade Notes
+
+- It is recommended to recreate boot media with the latest images to benefit fully from hardware support enhancements.
+- Verify device exclusion lists in autonuke configurations, as new parameters may affect existing setups.
+- Consult the updated [Upgrade Instructions & Best Practices](/changelog/upgrade-guides-impact/upgrade-instructions) for smooth transitions.
+
+## 5. Practical Tips for Users
+
+- Utilize device exclusion settings carefully to protect boot media, especially when enabling autonuke mode.
+- Before wiping SSD or NVMe devices, consider firmware erase methods documented in the expert guide for optimal results.
+- Export erasure certificates immediately after wipes to safeguard audit trails.
+
+## 6. Troubleshooting Common Scenarios
+
+<AccordionGroup title="Troubleshooting Highlights">
+<Accordion title="Drive Not Detected After Upgrade">
+Ensure USB adapter firmware is up to date and reconnect devices. Refer to USB adapter compatibility documentation.
+</Accordion>
+<Accordion title="Wipe Verification Fails Unexpectedly">
+Check wipe method parameters and confirm drive health status with updated `smartmontools`. Review log files for detailed error reports.
+</Accordion>
+<Accordion title="Boot Media Accidentally Included in Wipe">
+Review exclusion list and confirm `skip-bootdisk` boot parameters. Apply more restrictive filters when using autonuke.
+</Accordion>
+</AccordionGroup>
+
+## 7. Contributors
+
+Thanks to the community contributors and maintainers who submitted patches, tested hardware support, and refined the wiping algorithms in this release.
+
+---
+
+For detailed technical information on the Buildroot-based toolchain and system configuration that powers ShredOS, consult the [Buildroot Configuration Documentation](https://buildroot.org/downloads/manual/manual.html#configure).
+
+For a comprehensive list of all ShredOS releases and their changes, see the [All Releases Table](/changelog/release-history/all-releases-table).
+
+---

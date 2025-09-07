@@ -1,0 +1,154 @@
+---
+title: "Roadmap & Upcoming Deprecations"
+description: "Lists anticipated changes, improvements being considered, and heads-up notices for planned deprecation of features—so users can prepare in advance and contribute to design discussions."
+---
+
+# Roadmap & Upcoming Deprecations
+
+This page outlines the anticipated changes, ongoing improvements, and planned feature deprecations within the Buildroot environment. It aims to inform users about upcoming shifts in functionality so they can prepare their configurations accordingly and participate in design discussions.
+
+---
+
+## 1. Legacy Configuration and Compatibility
+
+Buildroot continues to manage backward compatibility through the `Config.in.legacy` mechanism. When configuration symbols are removed or renamed, compatibility wrappers help migrate users smoothly. However, options older than approximately five years are removed to ensure a clean baseline and prevent unpredictable behavior.
+
+- Legacy options trigger the selection of a `BR2_LEGACY` symbol that flags incompatibilities during build-time.
+- Examples of renames include package name changes and configuration symbol replacements.
+- Users must review and update legacy options after upgrading to avoid build failures.
+
+<details>
+  <summary><strong>Tip:</strong> Always save your configuration and rerun the configuration editor after upgrading Buildroot to detect and manage legacy options.</summary>
+
+---
+
+Refer to the <code>Config.in.legacy</code> file in the Buildroot sources for detailed legacy mappings.
+</details>
+
+## 2. Planned Package and Feature Removals
+
+Buildroot actively removes packages and kernel options that are obsolete, unmaintained, or replaced upstream. Users should review their `.config` files and adapt accordingly.
+
+### Notable Removals in Recent Releases
+
+- Removal of packages like `bsdiff`, `popperjs`, `midori`, `frotz`, `fan-ctrl`, and the `amd-catalyst` driver due to lack of maintenance.
+- Deprecation of kernel header versions older than 6.10.x, reflecting upstream kernel maintenance policy.
+- Obsolete toolchains and compilers such as GCC versions 4.x to 11.x have been phased out in favor of newer versions.
+- Legacy bootloaders such as `grub-legacy` and `gummiboot` have been replaced by more modern alternatives.
+
+### Migration Actions
+
+- Replace removed packages with supported alternatives (e.g., `popperjs` replaced by `floating-ui`).
+- Upgrade kernel headers and toolchain versions to maintained series.
+- Remove or rename legacy symbols as indicated by the Buildroot configuration system.
+
+## 3. Evolution of Toolchains and Build Infrastructure
+
+Buildroot introduces new toolchain versions and removes outdated ones on a planned schedule.
+
+- Default GCC versions update regularly; currently GCC 14.x is the standard.
+- Binutils versions are incremented, and the infrastructure enforces compatibility with new versions.
+- C library support evolves with deprecation of eglibc and older uClibc versions.
+- New kernel headers versions are supported in line with upstream kernel releases.
+
+**Recommended:** Monitor the Buildroot toolchain configuration menus for updated defaults and migration notices.
+
+## 4. Build System Improvements & Enhancements
+
+Buildroot continuously refines build systems support, including autotools, CMake, Python setuptools, LuaRocks, Perl CPAN, Meson, Waf, Cargo (Rust), and Go packages.
+
+- Enhancements to Buildroot’s package infrastructure facilitate better dependency management and reproducible builds.
+- Support for per-package build directories, enabling improved parallel builds, though experimental, has been introduced.
+- Incremental build diagnostics and configuration options have been expanded to ease development and maintenance.
+
+## 5. br2-external Tree and Customizations
+
+The introduction of the `br2-external` mechanism allows users to keep project-specific customizations outside the Buildroot tree while tightly integrating them.
+
+- External trees must define a unique `name` in `external.desc`.
+- Support for multiple simultaneous external trees enables layered customizations.
+- Project-specific patches, overlays, configurations, and packages can be maintained cleanly.
+
+<details>
+  <summary><strong>Best Practice:</strong> Structure your project-specific overlays and patches under `board/&lt;company&gt;/&lt;board&gt;/` to follow Buildroot conventions.</summary>
+
+Learn more about br2-external trees and customization strategies in the [Project-specific Customization guide](../guides/expert-practices-special-cases/builder-guide).
+</details>
+
+## 6. Migration Guidelines
+
+To address planned removals and backward incompatibilities:
+
+- Use `make menuconfig` to review your configuration after upgrading.
+- Pay special attention to any options that appear under the Legacy menu and update them accordingly.
+- When receiving build failures, consider doing a full rebuild (`make clean all`) to ensure consistency.
+- Use the Buildroot migration guides to adapt external packages and customizations to new interfaces and configurations.
+
+Refer to the official migration documentation for detailed steps on transitioning between releases.
+
+## 7. Release and Development Cadence
+
+Buildroot maintains a quarterly release schedule in February, May, August, and November.
+
+- Each release is followed by minor bugfix versions.
+- The first release each year is designated as Long-Term Support (LTS).
+- Development branches evolve with staged merges and stabilization cycles.
+
+Users are encouraged to upgrade regularly and consult release notes for breaking changes and critical fixes.
+
+## 8. How to Prepare and Submit Contributions
+
+Buildroot depends on its community for continuous improvement.
+
+- Developers should use Git for contributing patches.
+- Patches should be well-formatted with clear commit messages and proper `Signed-off-by` lines.
+- Use the `check-package` script to ensure coding style compliance.
+- Submit patches to the mailing list, and use the `get-developers` tool to identify maintainers.
+- Include changelogs on patch revisions and cover letters for large patch sets.
+
+Community resources such as mailing lists, IRC channels, and Patchwork streamline collaboration.
+
+## 9. References and Further Reading
+
+- [Buildroot User Manual](../docs/manual/manual.md) — comprehensive guide covering Buildroot usage
+- [Upgrade Instructions & Best Practices](./upgrade-instructions) — step-by-step migration support
+- [Release History & Highlights](./release-history/current-latest-release) — details about recent and past releases
+- [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options) for setting up Buildroot system configurations
+- [Project-specific Customization](../guides/expert-practices-special-cases/builder-guide) for advanced tailoring
+
+---
+
+## Appendix: Sample Legacy Option Migration
+
+```makefile
+# Example of a legacy renamed option handling
+config BR2_PACKAGE_POPPERJS
+	bool "popperjs has been removed"
+	select BR2_LEGACY
+	help
+	  The project has been renamed to floating-ui.
+
+# To migrate, enable BR2_PACKAGE_FLOATING_UI and disable BR2_PACKAGE_POPPERJS
+```
+
+---
+
+## Troubleshooting & Tips
+
+- Legacy option detection will prevent building until resolved.
+- Use `make menuconfig` and check the Legacy menu for obsolete options.
+- Keep your toolchain and kernel header selections current to avoid incompatibilities.
+- For complicated upgrade paths, refer to official migration documentation and community forums.
+
+---
+
+## Summary
+This roadmap page is intended as a proactive noticeboard for users and integrators to stay informed about upcoming changes, deprecations, and removals within Buildroot, particularly relevant to ShredOS integration.
+
+
+---
+
+### License and Notices
+Buildroot and its patches are open-source under GNU GPL-2.0 or later, with package patches following upstream licenses.
+
+Use this page together with official release notes to plan your Buildroot migration strategy and ensure ongoing system reliability.

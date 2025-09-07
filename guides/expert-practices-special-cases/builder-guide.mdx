@@ -1,0 +1,192 @@
+---
+title: "Building ShredOS Images for Custom Hardware"
+description: "A technical-practioner-focused tutorial for building ShredOS from source. Guides users through prerequisites, configuration, compiling, and burning custom images, supporting edge scenarios (32/64-bit, UEFI, device drivers, persistent settings)."
+---
+
+# Building ShredOS Images for Custom Hardware
+
+A comprehensive, technical guide designed for practitioners who want to build ShredOS images tailored to custom hardware platforms. This tutorial walks through all necessary steps from host setup and prerequisite verification, to Buildroot configuration, compiling the source, and final image preparation including advanced options like UEFI support, device drivers, and persistent settings.
+
+---
+
+## 1. Overview
+
+This guide enables you to successfully build ShredOS from source for custom hardware platforms. It covers cross-compilation toolchain setup, kernel and bootloader configuration, customizing device drivers, and creating bootable images. It also supports edge scenarios such as 32/64-bit architectures, UEFI firmware, persistent filesystem overlays, and intricate device setup.
+
+### Prerequisites
+- A Linux host system with all mandatory build packages installed (e.g., gcc ≥ 4.8, make ≥ 3.81, wget, patch, etc.).
+- Basic familiarity with command-line operations and embedded Linux system concepts.
+- Access to the ShredOS Buildroot source tree.
+
+### Expected Outcome
+- A fully configured Buildroot environment tailored to your hardware.
+- A complete build producing kernel, bootloader, root filesystem, and image files.
+- Bootable ShredOS images fit for your target platform, ready to be deployed on USB drives or other media.
+
+### Time Estimate
+Approximately 1-3 hours depending on the host machine, network speeds, and hardware complexity.
+
+### Difficulty Level
+Intermediate to Advanced; some knowledge of embedded Linux building and cross-compilation is recommended.
+
+---
+
+## 2. Workflow Instructions
+
+### Step 1: Prepare Your Linux Host Environment
+1. Ensure installation of all mandatory build tools. You can verify by running commands such as:
+   ```bash
+   gcc --version
+   make --version
+   wget --version
+   ```
+2. Install optional tools to enable GUI configuration and enhanced features:
+   - *ncurses* for menuconfig
+   - *qt5* for xconfig
+   - *glib2*, *gtk2*, *glade2* for gconfig
+3. Confirm availability of source fetching utilities for git, svn, curl, etc., if your project requires them.
+
+### Step 2: Acquire and Prepare Buildroot Source Tree
+- Clone the ShredOS Buildroot repository or download a release tarball as preferred.
+
+### Step 3: Start Buildroot Configuration
+- Navigate to your Buildroot directory.
+- Run configuration with your preferred interface:
+  ```bash
+  make menuconfig
+  # or
+  make nconfig
+  # or
+  make xconfig
+  ```
+- Within the configuration tool:
+  - Select your target **CPU architecture** (e.g., x86_64, i386).
+  - Choose the **toolchain type**:
+    - *Internal toolchain backend* (Buildroot to build your cross-toolchain) or
+    - *External toolchain backend* (prebuilt or custom toolchain).
+  - Configure the **Linux kernel** options:
+    - Choose your kernel version (latest, CIP stable, custom tarball, or repository).
+    - Set kernel binary format (zImage, uImage, bzImage, etc.).
+    - Enable Device Tree Blob (DTB) support if applicable.
+    - Set the kernel configuration method (defconfig, custom config file, fragments).
+  - Configure your **bootloader** (U-Boot or Barebox):
+    - Select bootloader version and build system.
+    - Enter board-specific configuration or use defconfig.
+    - Specify any loading of device tree files or environment files.
+
+### Step 4: Customize Device Management
+- Choose from one of the `/dev` management options:
+  - Static device table
+  - Dynamic devtmpfs
+  - Dynamic devtmpfs + mdev
+  - Dynamic devtmpfs + eudev
+- Add any custom device table files or permission tables if needed using:
+  - `BR2_ROOTFS_STATIC_DEVICE_TABLE`
+  - `BR2_ROOTFS_DEVICE_TABLE`
+- Configure initialization system (BusyBox init is recommended for most embedded systems).
+
+### Step 5: Customize Root Filesystem and Overlays
+- Prepare any root filesystem overlay directories holding custom files and configurations.
+- In configuration select `BR2_ROOTFS_OVERLAY` and point to your overlay directory.
+- For more complex modifications, supply post-build scripts (`BR2_ROOTFS_POST_BUILD_SCRIPT`) to run shell scripts that modify the generated root filesystem before image assembly.
+- Optionally set up post-image scripts to run after image creation.
+
+### Step 6: Add Additional Packages and Drivers
+- Enable additional hardware drivers or custom packages in the package menu.
+- Add project-specific patches or package recipes using:
+  - `BR2_GLOBAL_PATCH_DIR` for patches
+  - `package/<manufacturer>/` directory for custom packages
+
+### Step 7: Start the Build Process
+- Build using:
+  ```bash
+  make
+  ```
+- Monitor the build logs in the `output/build/` directory.
+- Upon successful completion, the built image files are available in `output/images/`.
+
+### Step 8: Save and Reuse Configuration
+- Save your working Buildroot configuration:
+  ```bash
+  make savedefconfig
+  cp defconfig configs/<boardname>_defconfig
+  ```
+- Store all associated kernel, bootloader, BusyBox, and uClibc configurations in board-specific directories such as `board/<manufacturer>/<boardname>/`.
+
+---
+
+## 3. Examples & Customization Scenarios
+
+### Example: Selecting a Custom Linux Kernel Version
+In `make menuconfig`:
+- Navigate to `Kernel` &rarr; `Kernel version` choice
+- Select `Custom version` or `Custom git` for advanced sources
+- Set appropriate `BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE` or repository URL
+- Provide custom config file path under `BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE`
+
+### Example: Using an External Toolchain
+In `make menuconfig`:
+- Select `Toolchain` &rarr; `Toolchain type` &rarr; `External toolchain`
+- Choose a prebuilt profile or custom
+- If custom path used, unselect automatic download and specify toolchain path
+
+### Example: Applying Custom Patches
+- Create patch files in `board/<manufacturer>/<boardname>/patches/<package>/`
+- Set `BR2_GLOBAL_PATCH_DIR` in configuration to point to patches directory
+- Name patches as `<number>-<description>.patch` to define application order
+
+### Example: Setting Up Rootfs Overlay
+- Create directory `board/<manufacturer>/<boardname>/rootfs-overlay/`
+- Place modified or additional root filesystem files therein
+- Point `BR2_ROOTFS_OVERLAY` config option to above directory
+
+### Example: Post-Build Script
+- Create `post_build.sh` under your board directory
+- Add any custom shell commands for final filesystem modifications
+- Set `BR2_ROOTFS_POST_BUILD_SCRIPT` to point to this script in Buildroot config
+
+---
+
+## 4. Troubleshooting & Tips
+
+### Common Issues
+- **Build fails due to missing packages or dependencies:** Ensure all required packages are enabled and dependencies are correctly specified.
+- **Kernel build fails:** Verify kernel config and toolchain compatibility.
+- **Device files missing on target:** Confirm `/dev` management configuration and static device tables.
+- **Configuration changes not applied:** Perform `make clean` for full rebuild after changing architecture or toolchain.
+
+### Best Practices
+- Always run Buildroot builds as a non-root user.
+- Use out-of-tree builds (`make O=builddir`) to maintain multiple configurations.
+- Save defconfig and component configs for reproducibility.
+- Use ccache (`BR2_CCACHE`) to speed up incremental builds.
+- Keep patches and customizations well organized in board directories.
+
+### Performance Considerations
+- Using an external prebuilt toolchain generally reduces build time.
+- Utilize top-level parallel build by enabling `BR2_PER_PACKAGE_DIRECTORIES` and running `make -jN`.
+- Avoid building over NFS or virtual machines that have slow I/O performance.
+
+### Advanced Alternatives
+- Use override source directories with `<pkg>_OVERRIDE_SRCDIR` for live development.
+- Add custom packages in `package/<manufacturer>/` and include them in package/Config.in.
+- Apply patches with global patch directories for easier patch management.
+
+---
+
+## 5. Next Steps & Related Documentation
+
+- [Buildroot Manual: Configuration](#) - deep dive into configuration options.
+- [Buildroot Documentation: Customizing the generated target filesystem](#) - detailed guide on filesystem overlays and post-build scripts.
+- [Getting Started: Build from Source](../getting-started/installation-setup/build-from-source) - overview for newcomers to build ShredOS.
+- [Boot Methods & Integration](../overview/architecture/booting-integration) - prepare your hardware boot setup.
+- [System Requirements & Supported Hardware](../getting-started/introduction-overview/supported-hardware-and-requirements) - verify hardware compatibility.
+- Buildroot Community Resources: mailing lists, IRC, and patch submission guidance.
+
+<Tip>
+Following this guide produces tailored ShredOS images optimized for your hardware with embedded cross-compilation toolchains, kernel, bootloader, and root filesystem. Managing configuration properly ensures reproducibility and smooth upgrades.
+</Tip>
+
+<Warning>
+Be sure to perform full rebuilds when changing key settings like target architecture or toolchain configuration to avoid build inconsistencies.
+</Warning>

@@ -1,0 +1,218 @@
+{
+  "background": {
+    "decoration": "gradient"
+  },
+  "colors": {
+    "dark": "#1E3A8A",
+    "light": "#60A5FA",
+    "primary": "#60A5FA"
+  },
+  "favicon": "/favicon.svg",
+  "fonts": {
+    "family": "Montserrat",
+    "format": "woff2",
+    "source": "https://fonts.gstatic.com/s/googlesansflex/v5/t5sJIQcYNIWbFgDgAAzZ34auoVyXkJCOvp3SFWJbN5hF8Ju1x6sKCyp0l9sI40swNJwGpVd4AZzz0v6lJ4qFXNZhGjLvDSkV4USKMo6qQzwliVdHAy9jxTDHg_ugnAakpwGc-cxgUqDCIUI.woff2"
+  },
+  "icons": {
+    "library": "fontawesome"
+  },
+  "logo": {
+    "dark": "./logo/logo.svg",
+    "light": "./logo/logo.svg"
+  },
+  "name": "ShredOS x86_64 - Disk Eraser",
+  "navigation": {
+    "tabs": [
+      {
+        "groups": [
+          {
+            "group": "Product Introduction \u0026 Value",
+            "pages": [
+              "overview/product-introduction/what-is-shredos",
+              "overview/product-introduction/value-proposition",
+              "overview/product-introduction/target-audience"
+            ]
+          },
+          {
+            "group": "System Architecture \u0026 Integration",
+            "pages": [
+              "overview/architecture/system-overview",
+              "overview/architecture/booting-integration"
+            ]
+          },
+          {
+            "group": "Core Concepts \u0026 Terminology",
+            "pages": [
+              "overview/concepts-terminology/core-concepts",
+              "overview/concepts-terminology/terminology"
+            ]
+          },
+          {
+            "group": "Quick Feature Overview",
+            "pages": [
+              "overview/quick-feature-overview/feature-list",
+              "overview/quick-feature-overview/extending-shredos"
+            ]
+          }
+        ],
+        "tab": "Overview"
+      },
+      {
+        "groups": [
+          {
+            "group": "Product Overview \u0026 Preparation",
+            "pages": [
+              "getting-started/introduction-overview/what-is-shredos",
+              "getting-started/introduction-overview/supported-hardware-and-requirements",
+              "getting-started/introduction-overview/terminology-and-concepts",
+              "getting-started/introduction-overview/prerequisites"
+            ]
+          },
+          {
+            "group": "Installation \u0026 Boot Guide",
+            "pages": [
+              "getting-started/installation-setup/download-shredos",
+              "getting-started/installation-setup/create-bootable-media",
+              "getting-started/installation-setup/ventoy-and-multi-boot",
+              "getting-started/installation-setup/build-from-source"
+            ]
+          },
+          {
+            "group": "Initial Configuration \u0026 First Boot",
+            "pages": [
+              "getting-started/first-use-configuration/first-boot-expectations",
+              "getting-started/first-use-configuration/configuring-options",
+              "getting-started/first-use-configuration/validation-and-test-wipe"
+            ]
+          },
+          {
+            "group": "Troubleshooting \u0026 Advanced Usage",
+            "pages": [
+              "getting-started/troubleshooting-advanced/common-issues",
+              "getting-started/troubleshooting-advanced/validation-errors-certificates",
+              "getting-started/troubleshooting-advanced/recovery-and-advanced-config"
+            ]
+          }
+        ],
+        "tab": "Getting Started"
+      },
+      {
+        "groups": [
+          {
+            "group": "Getting Started \u0026 Essential Workflows",
+            "pages": [
+              "guides/getting-started-workflows/quickstart-guide",
+              "guides/getting-started-workflows/booting-running-shredos",
+              "guides/getting-started-workflows/basic-disk-erasure"
+            ]
+          },
+          {
+            "group": "Advanced Usage \u0026 Customization",
+            "pages": [
+              "guides/advanced-usage-customization/nwipe-options-customization",
+              "guides/advanced-usage-customization/headless-remote-wipes",
+              "guides/advanced-usage-customization/keyboard-locale-persistence",
+              "guides/advanced-usage-customization/troubleshooting-and-recovery"
+            ]
+          },
+          {
+            "group": "Certificates, Logging, and Integration Workflows",
+            "pages": [
+              "guides/certificates-logging-integration/certificate-generation-best-practices",
+              "guides/certificates-logging-integration/log-export-workflows"
+            ]
+          },
+          {
+            "group": "Expert Practices \u0026 Special Scenarios",
+            "pages": [
+              "guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme",
+              "guides/expert-practices-special-cases/multi-disk-wipe-server-rack",
+              "guides/expert-practices-special-cases/builder-guide"
+            ]
+          }
+        ],
+        "tab": "Guides"
+      },
+      {
+        "groups": [
+          {
+            "group": "General Usage \u0026 Getting Started",
+            "pages": [
+              "faq/faq_getting_started_usage/what_is_shredos",
+              "faq/faq_getting_started_usage/how_to_write_and_boot",
+              "faq/faq_getting_started_usage/supported_hardware_os",
+              "faq/faq_getting_started_usage/first_steps_after_erasure"
+            ]
+          },
+          {
+            "group": "Troubleshooting \u0026 Performance",
+            "pages": [
+              "faq/faq_troubleshooting_optimization/device_not_detected",
+              "faq/faq_troubleshooting_optimization/boot_problems",
+              "faq/faq_troubleshooting_optimization/font_size_resolution",
+              "faq/faq_troubleshooting_optimization/usb_adapter_issues",
+              "faq/faq_troubleshooting_optimization/performance_optimization"
+            ]
+          },
+          {
+            "group": "Features, Integration \u0026 Advanced Scenarios",
+            "pages": [
+              "faq/faq_features_integration/nwipe_methods",
+              "faq/faq_features_integration/autonuke_command_line",
+              "faq/faq_features_integration/output_files_certificates",
+              "faq/faq_features_integration/integration_ventoy_pxe",
+              "faq/faq_features_integration/keyboard_layout_language",
+              "faq/faq_features_integration/headless_telnet"
+            ]
+          },
+          {
+            "group": "Support \u0026 Community Help",
+            "pages": [
+              "faq/faq_support_community/where_to_get_help"
+            ]
+          }
+        ],
+        "tab": "FAQ"
+      },
+      {
+        "groups": [
+          {
+            "group": "Release History \u0026 Highlights",
+            "pages": [
+              "changelog/release-history/current-latest-release",
+              "changelog/release-history/prior-release-highlights",
+              "changelog/release-history/all-releases-table"
+            ]
+          },
+          {
+            "group": "Upgrade Guides \u0026 Breaking Changes",
+            "pages": [
+              "changelog/upgrade-guides-impact/upgrade-instructions",
+              "changelog/upgrade-guides-impact/breaking-changes-migrations",
+              "changelog/upgrade-guides-impact/deprecations-removed-features"
+            ]
+          },
+          {
+            "group": "Technical Release Notes",
+            "pages": [
+              "changelog/technical-release-notes/bug-fixes-patches",
+              "changelog/technical-release-notes/tool-version-updates"
+            ]
+          },
+          {
+            "group": "Community Feedback \u0026 Forward Roadmap",
+            "pages": [
+              "changelog/community-feedback-future/user-feedback-recurring-requests",
+              "changelog/community-feedback-future/roadmap-future-deprecation"
+            ]
+          }
+        ],
+        "tab": "Changelog"
+      }
+    ]
+  },
+  "styling": {
+    "codeblocks": "dark",
+    "eyebrows": "breadcrumbs"
+  }
+}

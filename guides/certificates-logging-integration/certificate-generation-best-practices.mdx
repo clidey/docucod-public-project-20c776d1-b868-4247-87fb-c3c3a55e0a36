@@ -1,0 +1,184 @@
+---
+title: "Generating and Saving Erasure Certificates"
+description: "Demonstrates how to enable, locate, and manage PDF wipe certificates for audit and compliance purposes, and discusses best practices for ensuring certificates are reliably generated for every wipe operation."
+---
+
+# Generating and Saving Erasure Certificates
+
+Secure erasure is critical in environments where auditability and compliance are required. ShredOS empowers you not only to wipe disks securely but also to generate tamper-evident PDF erasure certificates as proof of data destruction. This guide focuses exclusively on how to **enable**, **locate**, and **manage** PDF wipe certificates in ShredOS, ensuring you maintain reliable proof for every wipe operation.
+
+---
+
+## 1. Overview
+
+The Erasure Certificate page in ShredOS documents the workflow around generating and handling certificates that verify your data has been securely wiped. Proper management of these certificates is essential for compliance with regulatory requirements and internal audit trails.
+
+---
+
+## 2. Prerequisites
+
+Before proceeding, ensure:
+
+- ShredOS is installed or booted with logging and certificate generation enabled.
+- Sufficient storage space on the destination medium (USB drive or internal storage) to save certificate files.
+- You know the directory paths where certificates are saved (see Step 4).
+
+---
+
+## 3. Enabling Erasure Certificate Generation
+
+By default, ShredOS supports generating PDF erasure certificates via the `nwipe` utility.
+
+**Steps to Enable:**
+
+1. **Edit the Kernel Boot Parameters in `grub.cfg`**
+
+   - Locate your ShredOS boot entry.
+   - Add or ensure the following parameters are present:
+     ```
+     nwipe.log=1 nwipe.log_cert=1 nwipe.log_dir=/mnt/usb/certs
+     ```
+   - `nwipe.log=1` enables logging.
+   - `nwipe.log_cert=1` enables PDF certificate generation.
+   - `nwipe.log_dir` sets the directory to save certificates.
+
+2. **Configure Persistent Settings**
+
+   - To persist certificate generation and location, use the persistent overlay or modify ShredOS Setup accordingly.
+
+3. **Reboot ShredOS with Updated Parameters**
+
+   - These kernel command-line options trigger generation of PDF certificates upon each wipe.
+
+<Tip>
+Always back up your modified `grub.cfg` and verify the syntax to avoid boot failures.
+</Tip>
+
+---
+
+## 4. Locating Certificates
+
+Certificates are stored as PDF files in the directory specified by the `nwipe.log_dir` parameter. Common locations include:
+
+- Mounted USB drives (e.g., `/mnt/usb/certs`)
+- Persistent internal storage directories (e.g., `/var/log/certs`)
+
+### How to access:
+
+- Plug in USB storage containing certificates.
+- Mount the USB device manually if not auto-mounted.
+- Navigate via terminal or file manager to the certificate directory.
+
+Example path on USB:
+
+```bash
+cd /mnt/usb/certs
+ls -l
+```
+
+You will find one or more PDF files, typically named with timestamps and drive IDs for easy identification.
+
+---
+
+## 5. Managing Certificates
+
+### Best Practices:
+
+- Regularly **backup certificates** to a secure location separate from the wiping device.
+- Maintain an **organized folder structure** for certificates with clear naming conventions.
+- For multi-drive wipes, **ensure each drive generates its own certificate**.
+
+### Tips:
+
+- Use automated scripts or cron jobs to archive certificates after completion.
+- Convert certificates to encrypted or signed PDFs if required by audit policy.
+- Regularly verify the presence of certificates post-wipe to avoid missing logs.
+
+---
+
+## 6. Verifying Certificate Generation
+
+After a wipe completes:
+
+1. Confirm that the certificate file appears in the specified directory.
+2. Open the certificate PDF to check for completeness:
+   - Date and time of wipe
+   - Device identifiers (serial, model, capacity)
+   - Wipe method used
+   - Confirmation of successful completion
+
+3. Check logs in `/var/log/nwipe.log` or console output for any errors related to certificate creation.
+
+<Check>
+If certificates are missing:
+- Verify kernel boot parameters include logging
+- Check write permissions on the certificate directory
+- Ensure storage has enough free space
+</Check>
+
+---
+
+## 7. Troubleshooting Common Issues
+
+### 7.1 Certificate Not Generated
+- Confirm `nwipe.log_cert=1` is enabled.
+- Ensure the certificate path exists and is writable.
+- Review system logs for permission or disk write errors.
+
+### 7.2 Unable to Locate Certificates
+- Check the mount status of external media.
+- Verify the `nwipe.log_dir` parameter for correct path.
+- Use system commands (`df -h`, `mount`) to confirm device mounts.
+
+### 7.3 Corrupted or Incomplete PDFs
+- Confirm the wipe process completed successfully.
+- Check for storage device errors on USB or persistent storage.
+- Re-run wipe with logging enabled to get proper certificates.
+
+---
+
+## 8. Example Configuration
+
+Edit your `grub.cfg` boot entry to include:
+
+```text
+menuentry 'ShredOS Secure Wipe' {
+    linux /boot/vmlinuz root=/dev/ram0 init=/init rw \
+          nwipe.log=1 nwipe.log_cert=1 nwipe.log_dir=/mnt/usb/certs quiet
+    initrd /boot/initrd.img
+}
+```
+
+After booting and wiping a disk, the certificate PDF will be at `/mnt/usb/certs`.
+
+---
+
+## 9. Next Steps & Related Docs
+
+- **Explore:**
+  - [Exporting Logs and Certificates to USB or Network](../certificates-logging-integration/log-export-workflows)
+  - [Configuring ShredOS (Options & Defaults)](../../getting-started/first-use-configuration/configuring-options)
+  - [Troubleshooting Common Issues](../../getting-started/troubleshooting-advanced/common-issues)
+
+- **Automate:** Use kernel command-line options and persistent overlays to automate certificate generation in batch wipes.
+
+- **Audit:** Plan for certificate archival and digital signing as part of your organizational compliance.
+
+---
+
+## 10. Additional Tips
+
+- Always test your wipe and certificate generation setup on a non-critical system.
+- Keep your bootloader configurations version-controlled.
+- Use unique log directories for each wipe session to avoid overwrites.
+- Validate certificates immediately after wipes to catch failures early.
+
+---
+
+## 11. Resources
+
+- [nwipe GitHub Repository](https://github.com/PartialVolume/nwipe)
+- [ShredOS GitHub Repository](https://github.com/PartialVolume/shredos.x86_64)
+- [Buildroot Manual](https://buildroot.org/downloads/manual/manual.html)
+
+---

@@ -1,0 +1,166 @@
+---
+title: "Where do I find log files and erasure certificates?"
+description: "Describes how ShredOS saves logs and PDF certificates, methods for retrieving them (USB, FTP/TFTP), and how to configure output destinations for compliance/auditing."
+---
+
+# Where do I find log files and erasure certificates?
+
+ShredOS generates detailed logs and PDF erasure certificates to provide an auditable record of each disk wipe operation. This documentation explains where these files are saved on the system, how to retrieve them using different methods like USB export or FTP/TFTP transfers, and how to configure output destinations for compliance and auditing workflows.
+
+---
+
+## 1. Understanding Logs and Certificates Output
+
+After completing a disk erasure job, ShredOS automatically creates the following critical output files:
+
+- **Erase Log File:** A textual log capturing detailed information about the wipe process, including start times, durations, methods used, errors encountered, and completion status.
+- **PDF Erasure Certificate:** A professionally formatted certificate summarizing the wipe operation and results; this serves as official proof of data destruction for compliance auditing.
+
+These files are essential to verify successful erasure and demonstrate adherence to security policies.
+
+
+## 2. Default Storage Locations
+
+### USB Media
+
+By default, ShredOS attempts to save logs and certificates to a connected USB flash drive if writable media is detected. This approach enables easy removal and secure archival for auditing.
+
+### Internal Storage
+
+If no USB device is found or writable, ShredOS will save output files to a local directory on the system's boot media or internal storage, typically under a path such as `/shredos_logs/` or `/var/log/shredos/`.
+
+
+## 3. Retrieving Logs and Certificates
+
+Depending on your environment and operational setup, ShredOS supports multiple methods to export or retrieve generated output.
+
+### A. Export to USB Flash Drive
+
+**User Workflow:**
+
+1. Plug a USB flash drive into the ShredOS running system.
+2. Upon wipe completion, the system will automatically store:
+   - The plain text log file
+   - The PDF erasure certificate
+3. Safely remove the USB drive for offline storage or archiving.
+
+**Important Tips:**
+- Ensure your USB device is formatted with a supported filesystem (e.g., FAT32) for compatibility.
+- Avoid using USB hubs or adapters that may cause intermittent device detection issues.
+
+
+### B. Export via Network (FTP/TFTP)
+
+ShredOS supports network transfer of logs and certificates using FTP or TFTP protocols, enabling automated collection in data centers or managed environments.
+
+**Setup Steps:**
+
+1. Configure ShredOS network options and specify the FTP or TFTP server to use.
+2. Provide server credentials and destination paths if necessary.
+3. Upon job completion, the system uploads logs and certificates automatically.
+
+**Notes:**
+- Network services like Telnet or FTP must be enabled explicitly in your configuration and should be secured.
+- Use this method mainly in trusted, private networks due to sensitive data transmission.
+
+
+## 4. Configuring Output Destinations
+
+ShredOS allows customization of output storage locations and behaviors via kernel command-line options or bootloader configuration (`grub.cfg`), such as:
+
+- `logdest=usb` — Forces logs and certificates to be saved only to USB media.
+- `logdest=ftp` — Directs ShredOS to send output over FTP.
+- `logdest=local` — Stores output locally on the boot media.
+- `logpath=PATH` — Overrides default directory path for storing output files.
+
+### Example of configuring USB output only:
+
+```ini
+logdest=usb noblank
+```
+
+### Example of configuring FTP server upload:
+
+```ini
+logdest=ftp ftpserver=192.168.1.20 ftpuser=admin ftppass=secret
+```
+
+Refer to ShredOS configuration documentation for further kernel parameter details.
+
+
+## 5. File Naming and Format
+
+- Log files are typically timestamped with the date and time of the wipe.
+- PDF certificates include unique identifiers corresponding to the erased device.
+- Files are written in standard PDF and plain text formats to ensure easy access.
+
+
+## 6. Practical Tips & Best Practices
+
+- Always verify the presence and integrity of output files immediately after a wipe.
+- Use high-quality USB flash drives formatted as FAT32 for broadest device compatibility.
+- When using network export, confirm the FTP/TFTP servers are reachable and have correct permissions.
+- For automated environments, configure persistent output paths to avoid data loss on reboot.
+
+
+## 7. Troubleshooting Common Issues
+
+### USB Output Does Not Appear
+
+- Check if the USB flash drive is connected and properly recognized by the system.
+- Verify the USB filesystem is supported and the USB drive is not write-protected.
+- Re-plug the USB device if it fails initial detection.
+
+### Network Export Fails
+
+- Ensure network connectivity and correct IP address configuration.
+- Verify FTP/TFTP server credentials and permissions.
+- Consult ShredOS network logs (if accessible) for errors during upload.
+
+### Output Files Not Found Locally
+
+- Check the configured output path.
+- Confirm that there is adequate storage space on the boot media.
+- Review bootloader parameters to ensure the filesystem is writable.
+
+
+## 8. Related Documentation
+
+- [Exporting Logs and Certificates to USB or Network](/guides/certificates-logging-integration/log-export-workflows)
+- [Generating and Saving Erasure Certificates](/guides/certificates-logging-integration/certificate-generation-best-practices)
+- [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options)
+- [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues)
+- [Automating Drive Wiping or Changing Defaults](/faq/faq_features_integration/autonuke_command_line)
+
+
+---
+
+> **Note:** Always handle erasure certificates and logs as sensitive data because they contain detailed information about targeted storage devices.
+
+---
+
+# Quick Reference Table
+
+| Method                  | Description                               | Location/Parameters                  |
+|-------------------------|-------------------------------------------|------------------------------------|
+| USB Export              | Automatically saves files to USB flash drive | USB writable media mount point      |
+| Local Storage           | Saves files to internal/boot media folder  | Default directory (customizable)    |
+| FTP/TFTP Network Export | Uploads files to server over network        | Configured FTP/TFTP server details  |
+
+---
+
+# Sample Kernel Command Line for Log Export
+
+```
+logdest=usb logpath=/logs
+```
+
+or
+
+```
+logdest=ftp ftpserver=192.168.1.100 ftpuser=user ftppass=pass
+```
+
+---
+
+This page equips users with the knowledge for successful retrieval and management of ShredOS erasure logs and certificates to meet security and compliance goals.

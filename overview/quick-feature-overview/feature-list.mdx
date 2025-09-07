@@ -1,0 +1,113 @@
+---
+title: "At-a-Glance: ShredOS Features"
+description: "A practical feature checklist covering supported architectures, wipe methods, device support (SATA, SAS, USB, NVMe), user interfaces (GUI, command-line), automation (autonuke, PXE), output/certificate logging, and additional disk utilities. Mapped to typical operational needs and how ShredOS addresses them."
+---
+
+# At-a-Glance: ShredOS Features
+
+Secure, flexible, and comprehensive — ShredOS offers a powerful set of features designed specifically for effective and automated disk sanitization on x86_64 and i686 systems. From broad hardware and filesystem support to versatile user interfaces and automation capabilities, ShredOS equips you to meet stringent data destruction requirements with confidence.
+
+---
+
+## Supported Architectures
+
+- **x86_64 and i686 architectures:** ShredOS is tailored to work seamlessly on the most common PC architectures, ensuring broad compatibility across desktops, laptops, and servers.
+
+## Wipe Methods
+
+- **Multiple overwrite methods including DoD, Gutmann, and more:** Choose from industry-standard secure erase algorithms to match compliance requirements or internal policies.
+- **Firmware enhanced erase support:** Optimized erase commands for SSDs and NVMe drives using vendor firmware when available, enabling faster and more reliable sanitization.
+
+## Device and Interface Support
+
+- **SATA, SAS, USB, NVMe device compatibility:** Wipe all common disk and solid state drives through direct connection methods.
+- **Support for common USB adapters:** Increased hardware compatibility for USB external drives and enclosures.
+
+## User Interfaces
+
+- **Graphical UI:** Easy-to-use interface for interactive wipe sessions.
+- **Command-line mode:** Full control via terminal for scriptable, headless operations.
+- **Autonuke mode:** Fully automated wipe based on pre-configured settings for unattended use.
+
+## Automation and Integration
+
+- **PXE (network) boot support:** Deploy ShredOS at scale on server racks or large data centers with network boot capabilities.
+- **Ventoy multi-boot compatibility:** Add ShredOS conveniently alongside other utilities on a single USB drive.
+- **Autonuke scripting:** Customize wipe automation precisely.
+
+## Output and Logging
+
+- **Certificate and log generation:** Generate detailed audit trails documenting wipe parameters and results.
+- **Options for auto-saving certificates/logs to USB or network storage:** Streamline compliance and auditing workflows.
+
+## Additional Utilities
+
+- **Disk analysis and utilities:** Tools like `hdparm` and `smartmontools` for drive health assessment and optimization.
+
+---
+
+## Why These Features Matter
+
+ShredOS brings a comprehensive feature set mapping directly to real-world needs:
+
+- **Regulatory compliance:** Satisfy mandates with certified wipe methods and traceable certificate output.
+- **Operational efficiency:** Support for automated and network boot workflows accelerates large-scale disk sanitization.
+- **Versatility:** Broad device compatibility and adaptive erase methods ensure effectiveness across heterogeneous environments.
+- **User flexibility:** Interactive and automated modes serve individual users and IT professionals alike.
+
+## Typical Use Scenarios
+
+*Wiping drives before resale, securely decommissioning data center racks, automating headless wipe rolls via PXE, using Ventoy for multi-tool bootable USBs, applying firmware-optimized SSD erases, and generating certificates for audit compliance.*
+
+---
+
+## Getting Started with These Features
+
+To begin exploring ShredOS capabilities:
+
+1. **Select the appropriate wipe method** for your drive type and security requirements.
+2. **Choose the user interface mode**—interactive GUI, command-line, or autonuke for automation.
+3. **Configure certificates and logging options** to suit auditing policies.
+4. **Deploy with your preferred boot method,** including USB, PXE, or Ventoy multi-boot.
+
+For detailed step-by-step instructions and extended configuration, see the [Quickstart Guide](/guides/getting-started-workflows/quickstart-guide) and [Advanced Usage & Customization](/guides/advanced-usage-customization/nwipe-options-customization).
+
+---
+
+## Tips and Best Practices
+
+- When using firmware erases on SSDs or NVMe drives, validate device support first.
+- Use PXE boot with autonuke mode for efficiently wiping multiple machines simultaneously.
+- Leverage logging and certificate generation to streamline compliance audits.
+- Customize keyboard layout and language settings to match your operational environment.
+
+---
+
+## Troubleshooting
+
+Common troubleshooting includes:
+
+- Device not detected: Check USB adapters and cables, consult compatibility list.
+- Boot issues: Confirm correct boot media creation; Ventoy compatibility sometimes requires updates.
+- Wipe speed optimization: Choose firmware erase methods where supported.
+- Certificate failures: Ensure output targets are correctly mounted and accessible.
+
+Refer to [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues) for detailed diagnostics.
+
+---
+
+## Related Documentation
+
+- [What is ShredOS?](/overview/product-introduction/what-is-shredos)
+- [Product Value & Use Cases](/overview/product-introduction/value-proposition)
+- [Target Audience & Key Scenarios](/overview/product-introduction/target-audience)
+- [Key Concepts: Disk Erasure with ShredOS](/overview/concepts-terminology/core-concepts)
+- [Boot Methods & System Integration](/overview/architecture/booting-integration)
+- [Quickstart Guide](/guides/getting-started-workflows/quickstart-guide)
+
+---
+
+## Summary
+This checklist summarizes ShredOS’s core features, organized by technical and operational needs. It serves as a practical reference for users to verify capability coverage pertinent to their disk erasure projects and compliance goals.
+
+---

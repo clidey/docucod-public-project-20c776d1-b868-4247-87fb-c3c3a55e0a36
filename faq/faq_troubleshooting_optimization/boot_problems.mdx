@@ -1,0 +1,174 @@
+---
+title: "ShredOS won’t boot—what should I check?"
+description: "Guides users through common causes of failed boot, including UEFI/BIOS settings, secure boot, legacy mode, and typical device compatibility issues. Includes solutions for ‘blank screen’ or ‘hanging’ at boot."
+---
+
+# ShredOS Won’t Boot—What Should I Check?
+
+When ShredOS fails to start properly, several common causes can block or delay booting. This guide walks you through the most frequent issues encountered during the boot process, focusing on firmware configuration, boot device compatibility, and troubleshooting ‘blank screen’ or hanging symptoms.
+
+---
+
+## 1. Common Boot Failure Causes
+
+Understanding where and why boot issues arise empowers you to troubleshoot effectively:
+
+- **UEFI/BIOS Firmware Settings**: Incorrect firmware mode or settings can prevent ShredOS from loading.
+- **Secure Boot Enabled**: Secure Boot often blocks unsigned or custom boot media.
+- **Legacy vs UEFI Boot Mode Mismatch**: ShredOS images are sensitive to boot mode; mismatch leads to failure.
+- **Device Compatibility & Boot Media**: USB drive or SD card issues, faulty media, or unrecognized devices can stop boot.
+- **Display or Output Issues**: Black screen or frozen displays sometimes mean serial console misconfigurations or unsupported display hardware.
+
+---
+
+## 2. Step-by-Step Boot Troubleshooting Checklist
+
+Follow this practical flow to systematically isolate and resolve boot hurdles.
+
+### Step 1: Verify Firmware Boot Mode
+
+1. **Access your system’s UEFI/BIOS setup** during startup (typically by pressing Del, F2, or Esc).
+2. **Check if Secure Boot is enabled.** Disable it to allow unsigned ShredOS media to load.
+3. **Confirm boot mode:**
+   - If your system boots with UEFI mode enabled, ensure you use the UEFI-compatible ShredOS image.
+   - For Legacy BIOS (CSM) mode, use the respective BIOS-targeted image.
+4. **Avoid boot mode switching mid-setup** without corresponding media updates.
+
+<Tip>
+Most boot problems stem from Secure Boot or boot mode mismatches. Disabling Secure Boot and matching your firmware boot mode to the media format resolves most failures.
+</Tip>
+
+### Step 2: Check Boot Media Integrity and Type
+
+- Use verified ShredOS images downloaded from the official source.
+- Write images to USB or CD/DVD with reliable tools like Rufus, Etcher, or dd (on Linux).
+- If possible, test the boot media on a different machine to rule out problems with the media itself.
+
+<Note>
+ShredOS supports boot from USB and optical media on x86_64 and i386 systems; ensure the media matches your system’s architecture.
+</Note>
+
+### Step 3: Check Device Compatibility and Connections
+
+- Ensure USB ports and cables are functional.
+- Avoid USB hubs or unpowered adapters when booting.
+- Confirm the target machine supports USB boot (refer to its BIOS/UEFI firmware manual).
+
+### Step 4: Use Serial Console for Diagnostic Output
+
+- ShredOS boots with verbose serial console settings by default (e.g., console=ttyS0,115200).
+- Connect a serial console cable to capture boot messages, especially useful if screen remains blank.
+- This can reveal where boot halts or errors occur.
+
+---
+
+## 3. Firmware Settings to Review
+
+Review these frequent settings that affect booting ShredOS:
+
+| Setting               | Recommended Configuration                   | Description                                            |
+|-----------------------|---------------------------------------------|--------------------------------------------------------|
+| Secure Boot           | Disabled                                    | Secure Boot blocks unsigned boot loaders.              |
+| Boot Mode             | Match ShredOS image mode (Legacy or UEFI)  | Select Legacy BIOS mode or UEFI mode accordingly.       |
+| Boot Priority         | Set USB or Optical media first              | Ensures system tries to boot from your ShredOS media.  |
+| Legacy USB Support    | Enabled (if Legacy boot)                     | Enables USB device recognition on older firmware.      |
+
+---
+
+## 4. Typical Symptom Scenarios and Solutions
+
+### Symptom: Blank Screen on Boot
+
+- The system powers on but shows no display output.
+
+**Possible causes:**
+- Incompatible video modes or missing drivers.
+- Secure Boot blocking boot.
+- Output going to serial console only.
+
+**Solutions:**
+- Connect a serial console to observe boot messages.
+- Disable Secure Boot.
+- Try booting on a different machine to isolate display issues.
+
+### Symptom: Boot Hangs or Freezes Early
+
+- Boot process stops or repeats without progressing to the ShredOS UI.
+
+**Possible causes:**
+- Incompatible kernel or device tree in bootloader configuration.
+- Corrupt media or incomplete image write.
+
+**Solutions:**
+- Re-create boot media with verified images.
+- Test with a different USB port or device.
+- If using custom hardware, verify bootloader configs (see board-specific boot.cmd or uEnv.txt files).
+
+### Symptom: Error Messages or No Boot Device Found
+
+- Firmware reports no bootable device or throws errors.
+
+**Possible causes:**
+- Boot priority misconfigured.
+- Media not formatted or detected properly.
+
+**Solutions:**
+- Reset firmware boot order to prioritize USB/CD.
+- Confirm media is inserted and recognized in BIOS/UEFI setup.
+
+---
+
+## 5. Understanding ShredOS Boot Configurations
+
+ShredOS uses board-specific bootloader scripts (e.g., `boot.cmd`, `uEnv.txt`) to load the kernel and device tree files and set boot arguments for console and root filesystem. These scripts often contain parameters such as:
+
+```bash
+setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait rw
+load mmc 0:1 0x41000000 zImage
+load mmc 0:1 0x41800000 <device-tree-file>.dtb
+bootz 0x41000000 - 0x41800000
+```
+
+If you are building custom images or working with specific hardware, ensure these configurations match your board’s memory layout, boot devices, and kernel requirements.
+
+For detailed reference, see the bootloader config examples in the ShredOS repository:
+- [Sipeed LicheePi Zero boot.cmd](https://github.com/PartialVolume/shredos.x86_64/tree/main/board/sipeed/licheepi_zero)
+- [BeagleBone AI uEnv.txt](https://github.com/PartialVolume/shredos.x86_64/tree/main/board/beagleboard/beagleboneai)
+
+---
+
+## 6. Additional Tips & Best Practices
+
+- Always test boot media on a non-critical system first.
+- Document firmware settings before changes to allow easy rollback.
+- Use serial console logging for in-depth troubleshooting.
+- Consult ShredOS’s [Boot Methods & System Integration](https://docs.shredos.io/overview/architecture/booting-integration) for advanced boot configurations.
+
+---
+
+## 7. When to Seek Support
+
+If you have exhausted the above checks and ShredOS still won’t boot:
+
+- Collect serial console logs or firmware error messages.
+- Verify your hardware meets minimum requirements ([Supported Hardware & System Requirements](https://docs.shredos.io/getting-started/introduction-overview/supported-hardware-and-requirements)).
+- Ask for help on official forums or support channels with detailed descriptions and logs.
+
+---
+
+## Related Documentation
+
+- [Booting and Running ShredOS](https://docs.shredos.io/guides/getting-started-workflows/booting-running-shredos)
+- [System Requirements & Supported Hardware](https://docs.shredos.io/getting-started/introduction-overview/supported-hardware-and-requirements)
+- [Troubleshooting Common Issues](https://docs.shredos.io/getting-started/troubleshooting-advanced/common-issues)
+- [Configuring ShredOS Options](https://docs.shredos.io/getting-started/first-use-configuration/configuring-options)
+
+---
+
+<Check>
+Ensure your boot media matches the system architecture and boot mode (Legacy or UEFI). Disabling Secure Boot is critical for ShredOS boot success.
+</Check>
+
+<Warning>
+Avoid changing firmware settings without backups—incorrect values can cause system instability or data loss.
+</Warning>

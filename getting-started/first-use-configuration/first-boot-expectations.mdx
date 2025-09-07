@@ -1,0 +1,175 @@
+---
+title: "First Boot: What to Expect"
+description: "Learn what happens on initial boot: how nwipe is launched, how the UI appears, and the basic workflow to discover, select, and wipe disks. Covers common boot issues (e.g., display, keyboard mapping) and interactive vs. ‘autonuke’ modes."
+---
+
+# First Boot: What to Expect
+
+Welcome to the first stage in your journey with ShredOS. This guide walks you through what happens the moment ShredOS boots up, how the disk erasure utility (nwipe) launches, what you see in the user interface, and how to start your first disk wiping operation.
+
+Understanding the initial boot process is critical for ensuring that your hardware is supported, the user interface works correctly, and you’re ready to securely cleanse disks with confidence.
+
+---
+
+## 1. Overview of the Initial Boot Process
+
+When you power on a system with ShredOS boot media, the following sequence unfolds:
+
+1. **Hardware Initialization:** Your system’s firmware loads the ShredOS bootloader (GRUB or equivalent), and the Linux kernel initializes your hardware.
+2. **Kernel and System Startup:** The kernel mounts the root filesystem from the boot media.
+3. **Automatic Launch of nwipe:** The core disk wiping utility, `nwipe`, starts automatically in interactive mode unless otherwise configured.
+4. **User Interface Display:** The `nwipe` user interface appears, showing detected storage devices ready for wiping.
+
+This automated flow is designed to get you directly to secure disk erasure without delays or manual intervention.
+
+---
+
+## 2. Appearance and Functionality of the nwipe User Interface
+
+### What You See
+
+- **Device List:** All detected disks are presented in an organized list, displaying key information such as device name, size, vendor, and status.
+- **Menu Options:** Options to select disks to wipe, set wipe methods, and start or abort operations.
+- **Status Bar:** Shows progress, current step, and any warnings or errors.
+
+### Basic Workflow with nwipe UI
+
+- Navigate the disk list using the arrow keys.
+- Use spacebar or enter to select disks.
+- Access the menu to configure wipe methods (e.g., DoD, Gutmann) or enable verification.
+- Initiate the wipe operation.
+
+The UI is straightforward, designed for both novice and expert users.
+
+---
+
+## 3. Interactive Mode vs. Autonuke Mode
+
+### Interactive Mode (Default)
+
+- Invoked automatically on boot unless disabled.
+- The user can manually select disks, configure options, and start wiping.
+- Provides safety by requiring explicit user actions.
+
+### Autonuke Mode
+
+- Designed for automated wiping in batch or unattended operation.
+- Begins wiping immediately on boot, skipping prompts.
+- Useful for high-volume or repeated wipe jobs.
+
+To use Autonuke, you must configure the boot parameters accordingly (see [Configuring ShredOS Options](/getting-started/first-use-configuration/configuring-options) and [Autonuke Command Line Usage](../faq/faq_features_integration/autonuke_command_line)).
+
+<Note>
+Autonuke mode is powerful but irreversible. Confirm your configuration and hardware targeting carefully before using.
+</Note>
+
+---
+
+## 4. Common Boot Issues and Troubleshooting
+
+### Display Issues
+
+- **Symptom:** No visible `nwipe` UI on the screen after boot.
+- **Causes:** Unsupported graphics mode, improper resolution, or console output errors.
+- **Resolution:** 
+  - Reboot and try alternative boot media (USB vs CD/DVD).
+  - Check and adjust kernel boot parameters related to display.
+  - Refer to [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues).
+
+### Keyboard Mapping Problems
+
+- **Symptom:** Keys produce incorrect characters or navigation doesn’t respond.
+- **Causes:** Incorrect keyboard layout for your region/hardware.
+- **Resolution:** 
+  - Change keyboard layout at boot or within `nwipe` options.
+  - Use the `loadkeys` utility from additional terminals (see [Changing Keyboard Layout and System Locale](/guides/advanced-usage-customization/keyboard-locale-persistence)).
+
+### Drive Detection Problems
+
+- **Symptom:** Target disks do not appear in the device list.
+- **Causes:** Unsupported or improperly connected storage hardware.
+- **Resolution:** 
+  - Verify drive connections and power.
+  - Check for USB adapter compatibility.
+  - Try another system to confirm drive status.
+  - Consult [Why isn’t my drive detected?](/faq/faq_troubleshooting_optimization/device_not_detected).
+
+<Warning>
+Never proceed with disk wiping if the target disks are not detected properly, to avoid wiping the wrong device.
+</Warning>
+
+---
+
+## 5. Step-by-Step: Your First Disk Wiping Operation
+
+Follow these actionable steps once the system boots into the `nwipe` UI:
+
+<Steps>
+<Step title="Verify Device Recognition">
+Confirm that all intended disks are listed with correct size and manufacturer details.
+</Step>
+<Step title="Select Disks to Wipe">
+Use arrow keys to highlight disks, then press spacebar to select or deselect each disk.
+</Step>
+<Step title="Configure Wipe Options">
+Press `m` (or the menu key) to open the wipe method options. Choose the appropriate method (e.g., DoD 5220.22-M, Gutmann).
+Set the number of overwrite passes and enable verification if desired.
+</Step>
+<Step title="Start Erasure">
+Press `s` to start the wipe process.
+Confirm any warnings if prompted.
+</Step>
+<Step title="Monitor Progress">
+Observe the status bar for progress updates.
+Wait until completion before powering off.
+</Step>
+</Steps>
+
+---
+
+## 6. Understanding Output and Logs
+
+Upon completing wipe operations, ShredOS generates logs and optionally erasure certificates that prove data destruction.
+
+- Access logs and certificates on attached USB drives or network shares.
+- Logs record device serials, wipe methods, completion status.
+- Certificates provide compliance evidence for audits.
+
+For full details, see [Generating and Saving Erasure Certificates](/guides/certificates-logging-integration/certificate-generation-best-practices) and [Log Export Workflows](/guides/certificates-logging-integration/log-export-workflows).
+
+---
+
+## 7. Tips and Best Practices
+
+- Always double-check disk selection before wiping.
+- Use verification after wiping whenever compliance requires it.
+- When operating in Autonuke mode, test configurations carefully in a controlled environment.
+- Read the on-screen error and warning messages thoroughly.
+- If problems arise, switch to a virtual terminal (Ctrl+Alt+F2) to inspect system logs.
+
+---
+
+## 8. Next Steps
+
+After your initial boot and operation:
+
+- Validate wipe success with a test validation wipe (see [Quick Validation: Test Your Setup](/getting-started/first-use-configuration/validation-and-test-wipe)).
+- Explore configuration options to tweak defaults ([Configuring ShredOS Options](/getting-started/first-use-configuration/configuring-options)).
+- Review troubleshooting guides if you encounter issues ([Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues)).
+- Familiarize yourself with automation options and multi-boot setups ([Ventoy and Multi-Boot](/getting-started/installation-setup/ventoy-and-multi-boot)).
+
+---
+
+### Related Documentation
+
+- [What is ShredOS?](/getting-started/introduction-overview/what-is-shredos) — Intros and overview
+- [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options)
+- [Quickstart: Securely Erasing a Disk](/guides/getting-started-workflows/quickstart-guide)
+- [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues)
+- [Autonuke Command Line Usage](/faq/faq_features_integration/autonuke_command_line)
+
+<Info>
+For advanced uses like PXE booting, network wipe, or firmware-based SSD erasure, see advanced guides once comfortable with the basics.
+</Info>
+
+---

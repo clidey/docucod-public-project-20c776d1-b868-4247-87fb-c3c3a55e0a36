@@ -1,0 +1,243 @@
+---
+title: "Customization & Extensibility"
+description: "Explains the avenues available for tailoring ShredOS: kernel/grub command-line arguments for behavioral tweaks, overlay capability for persisted configuration, language and keyboard settings, network output for logs/certificates, and how user-contributed utilities (e.g., hdparm, smartmontools) can be leveraged on virtual terminals. Includes references to relevant scripts and overlay folders."
+---
+
+# Customization & Extensibility
+
+Unlock the full power of ShredOS by tailoring its behavior and appearance to fit your unique environment and workflow. This page serves as your comprehensive guide to customizing ShredOS through kernel and Grub command-line parameters, overlay filesystems for persistent settings, language and keyboard layouts, network-based log and certificate export, and leveraging additional utilities available in separate virtual terminals.
+
+---
+
+## Overview
+
+ShredOS is designed not just to be a powerful disk eraser but also flexible and adaptable. Whether you require automated disk wiping, specific wipe method defaults, log file network export, or customized user interface properties, ShredOS supports these through several customization avenues.
+
+- **Kernel and Grub Command-Line Arguments:** Adjust core behavior such as device exclusion, wipe methods, verification, and autonuke settings by modifying bootloader configuration.
+- **Overlay Filesystem:** Customize persistent configurations and add or modify files inside the system without rebuilding the entire image.
+- **Language and Keyboard Configurations:** Personalize keyboard layouts and language settings for enhanced user experience.
+- **Network Output Options:** Automatically export logs and PDF certificates to FTP or TFTP servers on your network.
+- **Additional Utilities:** Use tools like `hdparm`, `smartmontools`, etc. on secondary virtual terminals for advanced drive management and inspection.
+
+### References
+
+- `board/shredos/fsoverlay/`: contains files overlaid onto the root filesystem for persistent customization.
+- `board/shredos/doimg.sh`: script involved in building and packaging the image.
+- `/boot/grub/grub.cfg` and `/EFI/BOOT/grub.cfg`: bootloader configuration files where kernel args are set.
+
+---
+
+## Kernel and Grub Command-Line Arguments
+
+Customizing ShredOS behavior begins with modifying kernel parameters passed at boot time. These are specified in both `/boot/grub/grub.cfg` and `/EFI/BOOT/grub.cfg` on the boot media.
+
+### Common Kernel Command-Line Arguments
+
+- `nwipe_options="..."`: Passes arguments to `nwipe` on startup.
+  - Example: `--method=zero --verify=off --noblank --nousb --autopoweroff`
+- `shredos_exclude_boot_disc="yes"`: Excludes the ShredOS boot drive from appearing in `nwipe`.
+- `telnetd=enable`: Enables the telnet server for remote or headless wiping operations.
+- `loadkeys=xx`: Sets the keyboard layout to `xx` (e.g., `us`, `uk`, `fr`).
+- `shredos_output=ftp://...` or `tftp://...`: Sends nwipe logs and certificates to a network FTP or TFTP server.
+- `lftp="open 192.168.1.60; user user pass; cd data; mput *.txt"`: Deprecated automatic network file transfer using lftp.
+
+### Modifying Grub Configuration
+
+Example of setting kernel parameters in a Grub menu entry:
+
+```bash
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--method=zero --verify=off --noblank --nosig" loadkeys=uk telnetd=enable shredos_exclude_boot_disc="yes" shredos_output="ftp://192.168.1.60/" 
+}
+```
+
+You can also specify devices to wipe directly from the command line.
+
+### Best Practices and Notes
+
+- Always make a backup of your original `grub.cfg` before editing.
+- Changes persist only if you edit the boot media and the changes are saved.
+- Use the `shredos_exclude_boot_disc` parameter to prevent ShredOS boot media from being wiped.
+- Telnet should only be used in trusted LAN environments due to lack of security.
+
+---
+
+## Overlay Filesystem for Persistent Configuration
+
+The ShredOS root filesystem is based on a read-only image; to persist changes, the overlay filesystem mechanism is employed.
+
+### Using the Overlay
+
+- Files placed in `board/shredos/fsoverlay/` are copied into the image at build time.
+- Permanent customizations such as configuration files, scripts, or replacing default binaries can be done here.
+- Example use cases:
+  - Add customized `grub.cfg` files.
+  - Insert scripts to automate wiping.
+  - Patch or add utilities.
+
+### Important Files and Directories
+
+- `board/shredos/fsoverlay/etc/shredos/`: configuration directory, e.g., could hold exclusion files.
+- `board/shredos/fsoverlay/boot/grub/grub.cfg`: bootloader config.
+- `board/shredos/fsoverlay/usr/bin/`: custom scripts or wrappers like `nwipe_launcher`.
+
+### Workflow
+
+Modify or add files inside `fsoverlay`, then rebuild the ShredOS image with the build system. Use the `doimg.sh` script in `board/shredos` for image generation.
+
+---
+
+## Language and Keyboard Layout Settings
+
+ShredOS allows personalization of keyboard layouts and language settings at boot.
+
+### Change Keyboard Layout
+
+- Use the `loadkeys` command with a valid keymap name, e.g., `us`, `uk`, `fr`, `de`.
+- Set persistently via kernel parameter:
+
+```bash
+linux /boot/shredos loadkeys=uk
+```
+
+- You may also manually execute `loadkeys uk` in a virtual terminal to change temporarily.
+
+### List Available Keymaps
+
+Keymaps are under `/usr/share/keymaps/<architecture>/`, for example `/usr/share/keymaps/i386/`.
+
+### Language Support
+
+Locale settings are configured during build. ShredOS by default includes `en_US.UTF-8`. Additional locale generation requires rebuilding the image.
+
+---
+
+## Exporting Logs and Certificates Over Network
+
+To automate the transfer of wipe logs and PDF certificates, ShredOS supports sending these files directly to a network server via FTP or TFTP.
+
+### Configure Network Output
+
+Add kernel parameters to the bootloader config:
+
+- `shredos_output="ftp://user:pass@192.168.1.60/path"`
+- Or for TFTP `shredos_output="tftp://192.168.1.60/path"`
+
+This automatically initiates file transfers after wipes complete.
+
+Note: `lftp` method is deprecated and may be removed in future versions.
+
+### FTP Server Requirements
+
+- Setup a chrooted FTP server (e.g., vsftpd) for safe file transfers.
+- Create a dedicated user with restricted access for wipe logs.
+
+### Manual Log Transfer
+
+Logs can be manually copied using USB or standard network tools (`lftp`, `scp`) from virtual terminals (ALT-F2 or ALT-F3).
+
+---
+
+## Leveraging Additional Utilities in Virtual Terminals
+
+ShredOS provides access to powerful drive utilities beyond `nwipe` for deeper diagnostics and drive management.
+
+### Accessing Virtual Terminals
+
+- `ALT+F1`: Default terminal where `nwipe` is automatically launched.
+- `ALT+F2` and `ALT+F3`: Access to additional terminals for manual commands.
+
+### Included Utilities
+
+- `hdparm`: For drive parameter tuning and ATA secure erase commands.
+- `smartmontools`: Check drive health and SMART attributes.
+- `hexedit`: Hexadecimal disk editor for direct disk data inspection.
+- `nvme-cli`: Commands for NVMe device management and sanitization.
+- `sg3_utils`: Tools for SCSI/SAS drive configuration and firmware-level erasure.
+- `parallel`: Execute drive commands in parallel for efficiency when wiping multiple devices.
+
+### Example: Using hdparm to Securely Erase an SSD
+
+```sh
+# Check drive status
+hdparm -I /dev/sdX | grep frozen
+# If frozen, unfreeze drive
+echo -n mem > /sys/power/state
+# Issue secure sanitize
+hdparm --yes-i-know-what-i-am-doing --sanitize-block-erase /dev/sdX
+# Verify
+dd if=/dev/sdX bs=8192 status=progress | hexdump
+```
+
+### Tips
+
+- Always verify correct drive selection before executing erase commands.
+- Use `parallel` to run multiple erase commands concurrently on different devices.
+
+---
+
+## Example: Modifying Default Nwipe Options Persistently
+
+To make `nwipe` start with your preferred settings every time, add the `nwipe_options` kernel parameter:
+
+```bash
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--method=zero --verify=off --noblank --autonuke"
+}
+```
+
+This will launch wiping immediately, overwriting drives with zeroes, skipping verification, and without a blanking pass.
+
+---
+
+## Troubleshooting Configuration
+
+If changes do not apply:
+
+- Confirm edits are in both `/boot/grub/grub.cfg` and `/EFI/BOOT/grub.cfg`.
+- Make sure you rebuilt and rewrote the image or rebuild overlay after changes.
+- Check boot logs with `dmesg` or view kernel command line via `cat /proc/cmdline`.
+- Use the second virtual terminal (ALT+F2) to manually run `nwipe` with options for testing.
+
+---
+
+## Next Steps & Resources
+
+- Modify the `grub.cfg` files for immediate kernel parameter customizations.
+- Place files, patches, or scripts in `board/shredos/fsoverlay` to persist changes.
+- Review [How to run nwipe with custom options](../guides/advanced-usage-customization/nwipe-options-customization) for deeper customization.
+- Configure network log export with proper FTP server setup.
+- Explore utilities on virtual terminals for specialized scenarios.
+
+For in-depth workflows and examples, refer to:
+- [How to run nwipe with command-line options](../guides/advanced-usage-customization/nwipe-options-customization)
+- [Saving nwipe logs and certificates](../guides/certificates-logging-integration/log-export-workflows)
+- [Using hdparm and nvme-cli for SSD/NVMe wiping](../guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme)
+
+---
+
+<AccordionGroup title="Related Configuration Files & Scripts">
+<Accordion title="board/shredos/fsoverlay/"><p>This directory contains overlay files that are merged during the build into ShredOS’s root filesystem. Customize or add files here to alter the system persistently.</p></Accordion>
+<Accordion title="board/shredos/doimg.sh"><p>Build script for ShredOS image that copies overlays, configures version files, and packages boot files.</p></Accordion>
+<Accordion title="board/shredos/grub.cfg"><p>Primary GRUB bootloader config affecting kernel command-line arguments for ShredOS.</p></Accordion>
+</AccordionGroup>
+
+<Tip>
+When editing `grub.cfg`, be mindful that syntax errors can prevent boot. Always backup before editing.
+</Tip>
+
+<Warning>
+Enabling telnet (`telnetd=enable`) exposes system on your network without encryption. Use only in secure LAN environments.
+</Warning>
+
+<Check>
+Verify you exclude the ShredOS boot drive from `nwipe` to prevent accidental erasure.
+</Check>
+
+---

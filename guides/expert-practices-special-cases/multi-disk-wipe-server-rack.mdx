@@ -1,0 +1,204 @@
+---
+title: "Efficient Multi-Disk and Rackserver Erasure"
+description: "Best practices and real-world tips for configuring, launching, and monitoring simultaneous wipes of dozens of disks (e.g., in servers/racks), including drive exclusion, hardware compatibility, and optimizing for performance and error handling."
+---
+
+## Efficient Multi-Disk and Rackserver Erasure
+
+### Overview
+This guide provides best practices for securely erasing multiple disks simultaneously using ShredOS, particularly in environments such as server racks or data centers. It focuses on configuring ShredOS and `nwipe` to handle dozens of drives, performance optimization strategies, hardware compatibility considerations, disk exclusion techniques, error handling, and monitoring wipe processes effectively.
+
+---
+
+### 1. Preparing for Multi-Disk Wipe
+
+#### Prerequisites
+- A bootable ShredOS USB flash drive or PXE boot setup correctly configured.
+- Confirmed hardware compatibility: ensure server BIOS/UEFI supports booting from media with ShredOS.
+- Sufficient power and cooling for all attached drives to operate simultaneously.
+- Appropriate permissions and knowledge to securely erase all target drives.
+
+#### Best Practices
+-Verify target drives identify correctly using `nwipe`'s GUI or command line.
+-Document drive identifiers (e.g., `/dev/sdX`) beforehand to avoid accidental wiping of the boot or OS drive.
+-Use drive labels or serial numbers when available for precise identification.
+
+---
+
+### 2. Launching Simultaneous Disk Wipes
+
+#### Using Nwipe GUI for Multiple Drives
+1. Boot into ShredOS and wait for `nwipe` GUI to enumerate all drives.
+2. Use the arrow keys or mouse (if supported) to select multiple disks for wiping.
+3. Specify the wipe method, write rounds, verification options, and blanking preferences.
+4. Confirm selections carefully before starting to avoid unintended data loss.
+
+#### Command Line Automation
+- Edit `/boot/grub/grub.cfg` or `/EFI/BOOT/grub.cfg` on the ShredOS media to include:
+  ```
+  set nwipe_options="--autonuke --method=dodshort --verify=last --noblank /dev/sdX /dev/sdY /dev/sdZ"
+  linux /boot/shredos console=tty3 loglevel=3 nwipe_options="$nwipe_options"
+  ```
+- Replace `/dev/sdX /dev/sdY /dev/sdZ` with the list of devices to wipe.
+- Boot ShredOS to start wiping all specified drives automatically.
+
+##### Notes:
+- `--autonuke` begins wipe immediately.
+- `--noblank` disables final zero blanking pass (optional).
+- You can add additional options like `--autopoweroff` to power down after completion.
+
+---
+
+### 3. Excluding Drives Safely
+
+#### Excluding Boot Drive
+- To avoid wiping the ShredOS USB media boot drive:
+  - Add `shredos_exclude_boot_disc="yes"` in grub.cfg kernel line.
+  - Alternatively, create an empty file at `/etc/shredos/shredos_exclude_disc` on the boot drive.
+
+#### Exclusion in Command Line
+- Use `--exclude=/dev/sdx` to exclude unwanted devices explicitly.
+- Up to ten comma-separated devices can be excluded.
+
+##### Important:
+- Only one boot drive should contain the exclude file/flag to prevent accidental wipes.
+
+---
+
+### 4. Performance Optimization
+
+#### Hardware Considerations
+- Use RAID controllers or hardware supporting hot-plug and multi-queue for efficient data throughput.
+- Avoid USB adapters with known compatibility issues (see [USB adapter discussion](https://github.com/PartialVolume/shredos.x86_64/discussions/128)).
+- Ensure ample system resources and power for concurrent disk operations.
+
+#### Software Options
+- Lower `--sync` values (fdatasync frequency) can improve wipe speeds but might risk data loss on power failure.
+- Use multi-threaded wiping features built into `nwipe` to fully utilize CPU cores.
+- Avoid unnecessary verification passes during bulk wipes to save time.
+
+---
+
+### 5. Monitoring and Error Handling
+
+#### Monitor Active Wipes
+- Use the `nwipe` interface on tty1 (ALT+F1) to watch progress.
+- Switch to virtual terminals (e.g., ALT+F2) to inspect logs and run diagnostic tools such as `smartctl` and `hdparm`.
+
+#### Detect & React to Errors
+- `nwipe` will report disk errors such as bad sectors in its summary.
+- Drives failing wipe verification or with read/write errors should be removed and replaced.
+- ShredOS saves wipe status and PDF certificates documenting success or failure.
+
+#### Automated Logging
+- Configure `lftp` or network output in grub.cfg to automatically send logs and reports to central servers (see saving certificates to FTP/TFTP servers in README).
+- Retain local USB logs for audit.
+
+---
+
+### 6. Real-World Scenario: Rack Server Wipe
+
+1. Power off the server and connect ShredOS USB or configure PXE boot.
+2. Boot into ShredOS.
+3. Wait 10+ seconds for USB devices to fully initialize (especially on older versions).
+4. Use the `nwipe` GUI to select all drives in the rack for wipe.
+5. Choose a fast but secure method like DoD short for mass wipes.
+6. Start wipe and monitor drives on Nwipe's main screen.
+7. Use ALT-F2 console for running `smartctl` across drives if needed.
+8. Upon completion, the system can power off automatically if configured.
+9. After wiping, remove ShredOS media and restart system or proceed with drive replacement/disposal.
+
+---
+
+### 7. Troubleshooting Common Multi-Disk Wipe Issues
+
+- **Drives not showing in GUI:**
+   - Wait longer for USB device initialization.
+   - Verify system BIOS/UEFI correctly detects all drives.
+- **Wipe hangs or stalls:**
+   - Review USB adapter compatibility.
+   - Check logs via virtual terminals for error messages.
+- **Drive errors during wipe:**
+   - Identify faulty drives and exclude them from batch wipes.
+   - Consider replacement or advanced diagnostics.
+- **Network log transfer failures:**
+   - Ensure FTP/TFTP server is accessible and credentials correct.
+   - Network firewalls allow required traffic.
+
+---
+
+### 8. Tips and Best Practices
+
+- Always double-check drive selections before starting a wipe.
+- Use persistent exclusion settings for boot media to prevent accidental wipes.
+- For extremely large environments, consider scripting `nwipe` via command line with device list files.
+- Keep spare devices ready for hardware failure replacements.
+- Regularly check ShredOS release notes for improvements in multi-drive support.
+- Use higher virtual terminal sessions for running supplementary disk utilities concurrently.
+
+---
+
+### Example grub.cfg Snippet for Multi-Disk AutoWipe
+```bash
+set default="0"
+set timeout="0"
+
+menuentry "shredos_autowipe" {
+  linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--autonuke --method=doDshort --verify=last --nousb --autopoweroff /dev/sd{b..e}"
+}
+```
+- This example wipes `/dev/sdb` through `/dev/sde` automatically with DoD short method, disables USB devices from wipe and powers off on completion.
+
+---
+
+### Next Steps & Further Learning
+- Explore [Wiping SSD and NVME using firmware commands](../expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme) for hybrid wipe strategies.
+- Read the [Quickstart: Securely Erasing a Disk](../getting-started-workflows/quickstart-guide) for foundational wipe usage.
+- Use the [Advanced Usage: Headless Remote Wipes](../advanced-usage-customization/headless-remote-wipes) for network orchestrated disk wipes.
+- Check the [Configuring ShredOS Options](../getting-started/first-use-configuration/configuring-options) for persistent wipe configuration.
+- For troubleshooting issues with drive detection and booting, consult [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues).
+
+---
+
+<Accordion title="Mermaid Diagram: Multi-Disk Wipe Workflow">
+```mermaid
+flowchart TD
+
+  Start["Start ShredOS Boot"] --> InitUSB["Initialize USB Devices & Drives"]
+  InitUSB --> ListDrives["List all Detected Drives in Nwipe"]
+  ListDrives -->|Select Drives| Select["Choose Drives & Wipe Settings"]
+  Select --> Confirm["Confirm Selections & Settings"]
+  Confirm --> WipeStart["Start Wiping Multiple Drives Simultaneously"]
+
+  WipeStart --> Monitor{"Monitor Progress?"}
+  Monitor --> |Yes| GUI["Nwipe GUI Progress"]
+  Monitor --> |No| SkipMonitor
+  GUI --> Errors{ "Any Errors Detected?" }
+  SkipMonitor --> Errors
+
+  Errors -->|Yes| HandleErrors["Mark Failed Drives, Exclude or Retry"]
+  Errors -->|No| Complete["Wipe Complete"]
+
+  HandleErrors --> Monitor
+
+  Complete --> PowerOff["Auto Power Off or Remove Media"]
+  PowerOff --> End["Process Ends"]
+
+``` 
+</Accordion>
+
+---
+
+<Tip>
+When wiping dozens of drives at once, always maintain a clear inventory of drive labels and serials outside of ShredOS to avoid mistakes.
+</Tip>
+
+<Warning>
+Enabling network transfer of logs and certificates should only be done on trusted and secure networks to prevent data leakage.
+</Warning>
+
+<Info>
+The drive exclusion file method is simple and reliable but only recommended for single boot USB drives to prevent accidental wipes.
+</Info>
+
+

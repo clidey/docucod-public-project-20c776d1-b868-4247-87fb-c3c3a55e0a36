@@ -1,0 +1,167 @@
+---
+title: "How do I write ShredOS to a USB flash drive or CD/DVD?"
+description: "Step-by-step instructions for downloading official ShredOS images and writing them to USB or CD/DVD, including platform-specific advice for Windows, Linux, and Mac. Troubleshooting tips for common imaging and boot issues are covered."
+---
+
+# How do I write ShredOS to a USB flash drive or CD/DVD?
+
+Securely wiping disks with ShredOS begins with creating a reliable bootable media. This guide provides clear, step-by-step instructions to download official ShredOS images and write them to USB flash drives or CD/DVDs, covering Windows, Linux, and macOS platforms. We'll also address common issues to help you boot ShredOS smoothly and start your disk erasure journey confidently.
+
+---
+
+## 1. Choose the Correct ShredOS Image
+
+Before writing ShredOS to your media, ensure you have the appropriate image:
+
+- **Architecture:** Confirm whether your system requires x86_64 or i686 (32-bit) builds.
+- **Boot Method:** Determine if you need BIOS or UEFI-compatible images.
+- **Media Type:** Download *.iso* files for CD/DVD burning or *.img* files for USB drives.
+
+Official releases and verification instructions are available at the [ShredOS GitHub releases page](https://github.com/PartialVolume/shredos.x86_64/releases).
+
+<Tip>
+Always verify the integrity of downloaded images using provided checksums to avoid corrupted or tampered files.
+</Tip>
+
+## 2. Writing ShredOS to a USB Flash Drive
+
+### Windows
+
+1. **Download Rufus** (https://rufus.ie/), a trusted USB writing utility.
+2. Insert your USB flash drive (minimum 1GB recommended; larger drives preferred).
+3. Open Rufus and select:
+   - **Device:** Your USB drive.
+   - **Boot selection:** Click 'SELECT' and choose your downloaded ShredOS *.img* file.
+   - **Partition scheme:** Choose MBR (for BIOS) or GPT (for UEFI) based on your target firmware.
+4. Click **START** and wait for the writing process to complete.
+5. Safely eject the USB drive.
+
+### Linux
+
+1. Insert your USB drive.
+2. Identify its device name via `lsblk` or `fdisk -l` (e.g., `/dev/sdX`).
+3. Use the `dd` command carefully (replace `/dev/sdX` and `shredos.img` with your actual device and file):
+
+   ```bash
+   sudo dd if=shredos.img of=/dev/sdX bs=4M status=progress oflag=sync
+   ```
+
+4. Wait until the command finishes; do not interrupt.
+5. Safely unmount and eject the USB drive.
+
+### macOS
+
+1. Insert your USB drive.
+2. Find the device name via `diskutil list` (e.g., `/dev/disk2`).
+3. Unmount the disk:
+
+   ```bash
+   diskutil unmountDisk /dev/disk2
+   ```
+
+4. Write the image using `dd` (convert device name accordingly):
+
+   ```bash
+   sudo dd if=shredos.img of=/dev/rdisk2 bs=4m status=progress
+   ```
+
+5. Wait until complete; you may need to enter your password.
+6. Eject the USB drive:
+
+   ```bash
+   diskutil eject /dev/disk2
+   ```
+
+## 3. Burning ShredOS to a CD/DVD
+
+### Windows
+
+1. Insert a blank CD/DVD into your optical drive.
+2. Use software like [ImgBurn](http://www.imgburn.com/) or built-in disc burning functionality.
+3. Select "Write image to disc" and choose the ShredOS ISO file.
+4. Begin the burn process and wait for completion.
+
+### Linux
+
+1. Insert a blank CD/DVD.
+2. Use Brasero, K3b, or command-line tools:
+
+   ```bash
+   wodim dev=/dev/cdrom speed=4 -v -data shredos.iso
+   ```
+
+3. Verify burn success before ejecting.
+
+### macOS
+
+1. Insert a blank CD/DVD.
+2. Open Disk Utility.
+3. Select "Burn" from the File menu.
+4. Choose the ShredOS ISO image.
+5. Proceed to burn and wait.
+
+## 4. Booting From the Created Media
+
+- Insert the USB or CD/DVD into the target system.
+- Power on and access your system’s boot menu (usually via F12, F10, F2, ESC keys).
+- Select the medium with ShredOS.
+- For UEFI systems, ensure boot options allow booting from external media.
+
+<Tip>
+If your system fails to recognize the boot media, double-check the image writing method and firmware boot settings (Legacy BIOS vs UEFI).
+</Tip>
+
+## 5. Troubleshooting Common Imaging and Boot Issues
+
+<AccordionGroup title="Common Problems Writing or Booting ShredOS">
+<Accordion title="USB Drive Not Booting">
+- Confirm the image was written to the entire device, not a partition.
+- Recreate the USB using a different tool (e.g., Rufus, BalenaEtcher).
+- Check BIOS/UEFI settings to enable USB boot.
+- Disable Secure Boot if applicable.
+</Accordion>
+<Accordion title="CD/DVD Disc Not Booting">
+- Verify the disc was burned as an image, not just copied as a file.
+- Try reburning at a lower speed.
+- Ensure your optical drive supports bootable discs.
+</Accordion>
+<Accordion title="Image Writing Error or Verification Failure">
+- Confirm checksum matches official releases.
+- Use a different USB drive or disc.
+- Re-download the image to rule out corrupt download.
+</Accordion>
+<Accordion title="System Boots but ShredOS Interface Does Not Appear">
+- Wait a few moments; early boot processes may take time.
+- Confirm the medium matches your system architecture and boot mode.
+- For UEFI systems, try enabling Legacy boot mode if supported.
+</Accordion>
+</AccordionGroup>
+
+## 6. Best Practices and Tips
+
+- Use high-quality USB drives or discs to avoid media errors.
+- If using USB, prefer USB 3.0 or above ports and drives for faster boot times.
+- Keep a console or monitor connected to observe boot messages for quick troubleshooting.
+- For repeated use, verify your boot media before each session.
+- See related documentation on [Creating Bootable Media](../getting-started/installation-setup/create-bootable-media) and [Ventoy Multi-Boot Setup](../getting-started/installation-setup/ventoy-and-multi-boot) for advanced scenarios.
+
+## 7. Next Steps
+
+After successfully booting ShredOS from your freshly created media, you can explore secure wiping workflows by following the [Quickstart Guide](../guides/getting-started-workflows/quickstart-guide) or configuring erasure preferences in the [Configuring ShredOS Options](../getting-started/first-use-configuration/configuring-options) documentation.
+
+---
+
+# Related Documentation
+- [Downloading ShredOS Images](../getting-started/installation-setup/download-shredos)
+- [Booting and Running ShredOS](../guides/getting-started-workflows/booting-running-shredos)
+- [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues)
+- [Multi-Boot with Ventoy](../getting-started/installation-setup/ventoy-and-multi-boot)
+
+---
+
+For complex hardware environments or network boots, consult the [Boot Methods & System Integration](../../overview/architecture/booting-integration) documentation for detailed workflows.
+
+
+---
+
+© ShredOS Documentation | [GitHub Repository](https://github.com/PartialVolume/shredos.x86_64)

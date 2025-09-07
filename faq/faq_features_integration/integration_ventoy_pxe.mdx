@@ -1,0 +1,133 @@
+---
+title: "Can I use ShredOS with Ventoy or PXE network boot?"
+description: "Gives setup tips for using ShredOS images with Ventoy for multi-boot USB drives and for booting via PXE on a network. Notes any image editing requirements for advanced usage."
+---
+
+# Can I use ShredOS with Ventoy or PXE network boot?
+
+This FAQ explains how to configure and use ShredOS images with Ventoy for creating multi-boot USB drives and how to boot ShredOS via PXE over a network. It also highlights any requirements or modifications necessary for these advanced boot methods to work smoothly.
+
+---
+
+## Using ShredOS with Ventoy for Multi-Boot USB Drives
+
+Ventoy is a popular tool that allows multiple bootable ISO or disk images to be copied onto a single USB drive with a menu-driven bootloader. ShredOS images are compatible with Ventoy, enabling users to include ShredOS alongside other operating systems on one USB stick.
+
+### How to Set Up ShredOS on Ventoy
+
+1. **Prepare Ventoy USB:** Follow Ventoy's official process to create a Ventoy-enabled USB drive.
+2. **Copy ShredOS Images:** Simply copy the ShredOS `.iso` or `.img` files onto the Ventoy USB drive alongside other ISOs.
+3. **Edit Embedded `grub.cfg` (Optional):** For advanced use cases, you may customize boot parameters by editing the embedded `grub.cfg` inside the ShredOS image. This allows tweaking wipe settings, enabling autonuke, or setting keyboard layouts.
+4. **Boot from Ventoy USB:** Select ShredOS from the Ventoy menu on your target machine and boot.
+
+### Important Tips and Best Practices
+
+- **Image Compatibility:** Use official ShredOS `.iso` images for best compatibility with Ventoy. Use `.img` images only if explicitly supported.
+- **`grub.cfg` Configuration:** When you need custom kernel parameters or automation, you'll have to extract and modify the ShredOS ISO's `grub.cfg`, then recreate the ISO or use Ventoy's menu customization features.
+- **Validation:** Always test the USB on your target hardware to confirm the boot and wipe processes behave as expected.
+
+### Common Pitfalls
+
+- **Failed Boot or Detection Issues:** Sometimes Ventoy menu entries or image files may not load correctly if image files are corrupted or modified incorrectly.
+- **Persistent Parameter Changes:** Without modification of the bootloader configs inside the ShredOS image, you cannot persist changes to wipe options or autorun modes.
+
+For detailed step-by-step instructions, see the [Ventoy and Multi-Boot Guide](/getting-started/installation-setup/ventoy-and-multi-boot) and the [Booting and Running ShredOS Guide](/guides/getting-started-workflows/booting-running-shredos).
+
+---
+
+## Booting ShredOS via PXE Network Boot
+
+PXE (Preboot Execution Environment) boot allows loading ShredOS over the network without local USB or optical media. This is ideal for environments managing many machines remotely or disklessly.
+
+### How to Set Up PXE Boot for ShredOS
+
+1. **Prepare PXE Server:** Set up a TFTP and DHCP server in your network environment configured to support PXE booting.
+2. **Copy ShredOS Boot Files:** Extract the necessary kernel, initramfs, and bootloader files from ShredOS images and place them in the PXE server's file directory.
+3. **Configure Bootloader Entries:** Configure your PXE bootloader (e.g., PXELINUX, iPXE, or Petitboot) with ShredOS boot options and kernel command-line parameters.
+4. **Network Boot Clients:** Configure client machines firmware (BIOS/UEFI) to network boot from the PXE server.
+5. **Test Boot and Erase:** Boot target machines over the network and run ShredOS and `nwipe` as usual.
+
+### Notes on PXE Boot Use with ShredOS
+
+- **Kernel Parameters:** You must customize kernel command-line arguments in the PXE bootloader config to adjust wipe settings and automation features.
+- **File Serving:** Ensure all image and boot files referenced by the PXE config are correctly served and accessible via TFTP or HTTP protocols.
+- **Secure Environment:** PXE boot servers should be on secure, trusted networks since network booting opens attack vectors.
+
+### Troubleshooting PXE Boot
+
+- **No PXE Response:** Verify DHCP and TFTP server settings, firewall rules, and client BIOS/UEFI boot order.
+- **Kernel Panic or Boot Fail:** Check that kernel and initramfs files are uncorrupted and compatible with the target hardware.
+- **Network Issues:** Ensure proper IP addressing and server availability.
+
+For comprehensive instructions and best practices, refer to the [Boot Methods & System Integration Overview](/overview/architecture/booting-integration) and specialized PXE boot server documentation.
+
+---
+
+## Editing ShredOS Images for Advanced Boot Customization
+
+When using Ventoy or PXE boot for unattended or automated workflows, you often need to customize boot options:
+
+- **Extract the Image:** Mount or unpack the ShredOS `.iso` to access `grub.cfg` or PXE config files.
+- **Modify Kernel Parameters:** Change kernel command-line arguments for `nwipe` options such as `autonuke=1`, device exclusions, logging paths, or keyboard layouts.
+- **Rebuild or Reference Modified Config:** For Ventoy, either create custom menu entries or rebuild images with the updated config. For PXE, adjust the PXE bootloader config accordingly.
+
+<Tip>
+Before modifying ShredOS images, always backup original files and verify your changes in a controlled test system to avoid accidental data loss.
+</Tip>
+
+---
+
+## Summary
+
+Using ShredOS with Ventoy or PXE network boot unlocks flexible deployment methods for secure disk wiping across diverse environments. Ventoy simplifies multi-boot USB drives with minimal setup, while PXE enables scalable network-based boots for remote wipe operations. Both require some configuration and possibly image or bootloader edits to customize wipe behavior and automate processes.
+
+For practical workflows, start with the official Ventoy USB setup or PXE boot server configuration, then adapt ShredOS boot parameters as needed for your wiping scenarios.
+
+
+---
+
+## Additional Resources
+
+- [Ventoy and Multi-Boot USB Guide](/getting-started/installation-setup/ventoy-and-multi-boot)
+- [Booting and Running ShredOS Guide](/guides/getting-started-workflows/booting-running-shredos)
+- [Boot Methods & System Integration Overview](/overview/architecture/booting-integration)
+- [Configuring ShredOS Options (grub.cfg editing)](/getting-started/first-use-configuration/configuring-options)
+- [Advanced Usage: Automation and Kernel Parameters](/guides/advanced-usage-customization/nwipe-options-customization)
+- Ventoy Official Documentation: https://www.ventoy.net/
+- PXE Boot Setup Tutorials: vendor or distro-specific guides
+
+<Warning>
+Booting and wiping drives involve irreversible data destruction. Confirm all configurations carefully, especially in multi-boot or networked environments, to avoid accidental data loss.
+</Warning>
+
+---
+
+## Troubleshooting Tips
+
+<AccordionGroup title="Common Issues When Using Ventoy or PXE with ShredOS">
+<Accordion title="ShredOS does not boot from Ventoy USB">
+- Verify that the ShredOS image file is not corrupt.
+- Use an official Ventoy USB installation.
+- Test image standalone before adding to Ventoy USB.
+- Check BIOS/UEFI boot order and settings.
+</Accordion>
+<Accordion title="Custom kernel parameters have no effect when booting with Ventoy">
+- Confirm you have modified the `grub.cfg` inside the ShredOS image or use Ventoy menu customizations.
+- Rebuild the ISO after changes if necessary.
+- Ventoy may cache or ignore dynamic config changes; reboot the USB drive.
+</Accordion>
+<Accordion title="PXE boot clients fail to load ShredOS kernel/initramfs">
+- Check DHCP and TFTP server settings and logs for errors.
+- Confirm file paths and filenames in PXE config are correct.
+- Ensure network connectivity and firewall rules allow TFTP.
+</Accordion>
+<Accordion title="Autonuke or wipe options don’t apply on network boot">
+- Verify kernel command-line parameters are correctly set in PXE config.
+- Test parameters manually in interactive mode before automation.
+- Confirm network boot environment supports all required files.
+</Accordion>
+</AccordionGroup>
+
+---
+
+By following these guidelines and leveraging the flexibility of Ventoy and PXE boot, ShredOS can seamlessly integrate into complex workflows supporting secure, scalable drive erasures.

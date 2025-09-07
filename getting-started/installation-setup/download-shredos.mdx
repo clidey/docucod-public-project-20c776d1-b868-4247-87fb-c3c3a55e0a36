@@ -1,0 +1,173 @@
+---
+title: "Download ShredOS"
+description: "Guidance to select and download the correct ShredOS img or iso for your hardware (32/64 bit, latest/pre-release, USB vs CD/DVD, bios/UEFI), ensuring you get a safe and up-to-date build."
+---
+
+# Download ShredOS
+
+This guide helps you select and download the correct ShredOS image or ISO file tailored for your hardware setup, ensuring you get a secure, safe, and up-to-date build for your disk erasure needs.
+
+---
+
+## 1. Understanding Your Hardware and Requirements
+
+Before downloading ShredOS, ensure you have identified key hardware and boot characteristics:
+
+- **Architecture:** Determine if your system is 32-bit (i586/i386) or 64-bit (x86_64). ShredOS offers images for both.
+- **Boot Firmware Type:** Does your system boot using Legacy BIOS or UEFI? Images support USB and CD/DVD boot for both, but there are some distinctions noted below.
+- **Boot Medium:** Decide whether you'll create a USB boot drive or boot from a CD/DVD. This affects whether you download `.img` (USB) or `.iso` (optical media) files.
+
+<div>
+  <Check>
+    To verify your system architecture:
+    
+    - On Linux or macOS, run: <code>uname -m</code>
+    - If output is <code>x86_64</code>, use the 64-bit image; if <code>i686</code> or <code>i386</code>, use the 32-bit image.
+  </Check>
+</div>
+
+---
+
+## 2. Selecting the ShredOS Build
+
+ShredOS provides multiple release versions, including stable latest releases and pre-release builds. Consider:
+
+- **Latest Stable Release:** The thoroughly tested, recommended version for most users.
+- **Pre-Releases:** Newer versions with additional features or fixes, but potentially less tested.
+
+### Recommended Download Choices
+
+| Version | Description | Typical User | Notes |
+|---------|-------------|--------------|-------|
+| Latest Stable Release | Full set of 32 and 64-bit `.img` and `.iso` files | Most users | Safe, stable, supports BIOS & UEFI boot |
+| Latest Pre-release | Usually latest 64-bit `.img` only | Advanced users, need newest features | Testing recommended before production use |
+
+---
+
+## 3. Available Image Types
+
+- **`.img` Files**: Designed for writing directly to USB flash drives. Supports BIOS and UEFI boot.
+- **`.iso` Files**: Designed for burning to CD/DVD or booting with tools like Ventoy. Currently supports legacy BIOS boot only, UEFI ISO support is in development.
+
+<Tip>
+.img files are recommended if you want a USB bootable medium and want UEFI support.
+.iso files are suitable for legacy BIOS CD/DVD boot or Ventoy users who want to quickly manage multiple boot images.
+</Tip>
+
+---
+
+## 4. Downloading ShredOS Images
+
+Below are links to the latest stable and previous release image files.
+
+### Latest Stable Release: v2024.11_27_x86-64_0.38
+
+| Nwipe Version | File Description | Download Link |
+|---------------|------------------|---------------|
+| v0.38         | USB bootable `.img` for 64-bit (x86_64) systems | [USB .img (64bit)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.11_27_x86-64_0.38/shredos-2024.11_27_x86-64_0.38_20250123.img) |
+| v0.38         | CD/DVD bootable `.iso` for 64-bit systems (Vanilla) | [CD/DVD .iso (64bit Vanilla)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.11_27_x86-64_0.38/shredos-2024.11_27_x86-64_0.38_20250125_vanilla.iso) |
+| v0.38         | CD/DVD bootable `.iso` for 64-bit systems (nomodeset) | [CD/DVD .iso (64bit nomodeset)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.11_27_x86-64_0.38/shredos-2024.11_27_x86-64_0.38_20250125_nomodeset.iso) |
+| v0.38         | USB bootable `.img` for 32-bit (i586) systems | [USB .img (32bit)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.11_27_x86-64_0.38/shredos-2024.11_27_i586_32bit_0.38_20250127_vanilla.img) |
+| v0.38         | CD/DVD bootable `.iso` for 32-bit systems | [CD/DVD .iso (32bit)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.11_27_x86-64_0.38/shredos-2024.11_27_i586_32bit_0.38_20250128_vanilla.iso) |
+
+### Previous Stable Release: v2024.02.2_26.0_x86-64_0.37
+
+| Nwipe Version | File Description | Download Link |
+|---------------|------------------|---------------|
+| v0.37         | USB bootable `.img` for 64-bit (x86_64) systems | [USB .img (64bit)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.02.2_26.0_x86-64_0.37/shredos-2024.02.2_26.0_x86-64_0.37_20240610.img) |
+| v0.37         | CD/DVD bootable `.iso` for 64-bit systems (Vanilla) | [CD/DVD .iso (64bit Vanilla)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.02.2_26.0_x86-64_0.37/shredos-2024.02.2_26.0_x86-64_0.37_20240611.iso) |
+| v0.37         | CD/DVD bootable `.iso` for 64-bit systems (nomodeset) | [CD/DVD .iso (64bit nomodeset)](https://github.com/PartialVolume/shredos.x86_64/releases/download/v2024.02.2_26.0_x86-64_0.37/shredos-2024.02.2_26.0_x86-64_0.37-nomodeset_20240611.iso) |
+
+---
+
+## 5. Verifying Download Integrity
+
+Always verify the integrity of downloaded files to avoid corrupted or tampered images.
+
+### Linux/macOS
+
+Use `sha1sum` or `shasum` and compare against checksums published in the release notes:
+
+```bash
+sha1sum shredos-2024.11_27_x86-64_0.38_20250123.img
+```
+
+For macOS:
+
+```bash
+shasum shredos-2024.11_27_x86-64_0.38_20250123.img
+```
+
+### Windows
+
+Use tools like [Hashtab](http://implbits.com/products/hashtab/) to check SHA-1 checksums.
+
+---
+
+## 6. Tips for Download Selection
+
+- If your target system supports UEFI boot and you want to boot from USB, download the `.img` 64-bit version.
+- For legacy BIOS systems, the `.iso` is an option if burning to CD/DVD.
+- To boot multiple OS images from one USB, consider using [Ventoy](https://github.com/ventoy/Ventoy) and just copy `.img` or `.iso` files to the Ventoy USB stick.
+- If you need a 32-bit image for older hardware, use the appropriate 32-bit `.img` or `.iso` from the releases.
+
+---
+
+## 7. Secure and Up-to-Date Builds
+
+ShredOS images include the latest stable or pre-release versions of nwipe and kernel fixes for the broadest hardware compatibility.
+
+- Use the latest stable release unless you require cutting-edge fixes.
+- Check the GitHub [Releases Page](https://github.com/PartialVolume/shredos.x86_64/releases) regularly for updates and pre-release notes.
+
+---
+
+## 8. Quick Notes on Usage After Download
+
+- Use the downloaded `.img` file to create a bootable USB flash drive via utilities like `dd` on Linux/macOS or Rufus/Etcher on Windows.
+- Burn `.iso` files directly to CD/DVD media or use with Ventoy-compatible USB sticks.
+- After booting, nwipe’s interactive GUI will launch, ready to select drives and wipe methods.
+
+<Tip>
+Always double-check the device(s) selected for wiping to avoid irreversible data loss on the wrong drives.
+</Tip>
+
+---
+
+## 9. Troubleshooting Download and Selection Issues
+
+<AccordionGroup title="Common Issues Downloading or Selecting Images">
+
+<Accordion title="I’m not sure whether to choose 32-bit or 64-bit images">
+Verify your CPU architecture using `uname -m`. Choose 64-bit images for `x86_64` and 32-bit for `i386` or `i586`. If unsure, 32-bit images are compatible with some 64-bit CPUs but may limit performance and hardware support.
+</Accordion>
+
+<Accordion title="Which image should I download for USB boot vs CD/DVD?">
+Download `.img` files for USB drives and `.iso` files for optical media. Note that `.iso` files currently do not support UEFI boot on ShredOS but `.img` files do.
+</Accordion>
+
+<Accordion title="Why does my USB boot fail after writing an .img file?">
+Check that you wrote the image correctly with `dd` or a trusted utility. Confirm your system supports USB boot and the firmware settings (legacy BIOS/UEFI) align with the image type. Refer to the [Booting and Running ShredOS](https://github.com/PartialVolume/shredos.x86_64) guide for additional assistance.
+</Accordion>
+
+<Accordion title="I want to use Ventoy, but how do I modify the boot options?">
+Ventoy boots any `.img` or `.iso` copied to the USB drive. To customize kernel command line options such as keyboard layout or nwipe flags, unpack the `.img` file, edit `/boot/grub/grub.cfg` or `/EFI/BOOT/grub.cfg`, then repack the image and copy it to Ventoy. Follow the detailed instructions in the ShredOS README.md documentation.
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+## 10. Additional Resources
+
+- [ShredOS Releases](https://github.com/PartialVolume/shredos.x86_64/releases) — Latest and all past versions
+- [Ventoy](https://github.com/ventoy/Ventoy) — Multi-boot USB utility supporting ShredOS
+- [ShredOS README](https://github.com/PartialVolume/shredos.x86_64/blob/master/README.md) — Detailed usage, troubleshooting, and building from source
+- [System Requirements & Supported Hardware](https://your-docs-domain/getting-started/introduction-overview/supported-hardware-and-requirements) — Ensure your hardware compatibility
+- [Booting and Running ShredOS Guide](https://your-docs-domain/guides/getting-started-workflows/booting-running-shredos) — Step-by-step boot instructions
+
+---
+
+For best results, always confirm your hardware specifications and boot firmware type before selecting an image. Use the latest stable release unless you have a specific reason for pre-release versions.
+
+Happy and safe wiping with ShredOS!

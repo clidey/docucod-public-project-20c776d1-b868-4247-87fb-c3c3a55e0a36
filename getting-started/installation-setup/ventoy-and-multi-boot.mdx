@@ -1,0 +1,195 @@
+---
+title: "Advanced: Multi-Boot with Ventoy"
+description: "Explains how to use ShredOS alongside other operating systems using Ventoy. Includes details on copying images, editing grub.cfg within .img files, and validating Ventoy setups."
+---
+
+# Advanced: Multi-Boot with Ventoy
+
+Securely erasing disks with ShredOS can be seamlessly integrated alongside other operating systems on the same bootable media using Ventoy, a versatile multi-boot USB solution. This guide walks you through copying ShredOS images onto a Ventoy USB drive, editing boot configurations within ShredOS `.img` files, and validating your Ventoy setup to ensure smooth multi-boot operation.
+
+---
+
+## 1. Introduction to Ventoy Multi-Boot
+
+Ventoy simplifies booting multiple ISO and IMG images from a single USB drive without repeatedly formatting or re-imaging the device. ShredOS images can coexist with other OS installers or utilities, allowing you to select which system to launch at boot.
+
+This approach is ideal for IT professionals who need to carry multiple tools in one portable device, improving workflow efficiency and minimizing downtime.
+
+
+---
+
+## 2. Preparing Your Ventoy USB Drive for ShredOS
+
+### Prerequisites
+
+- A USB drive with sufficient capacity for the images you intend to use.
+- Ventoy installed on your USB drive. Download from [Ventoy Official Site](https://www.ventoy.net).
+- ShredOS `.img` or `.iso` files ready for deployment.
+
+### Step-by-Step Instructions
+
+<Steps>
+<Step title="Install Ventoy on USB Drive">
+1. Download and run the Ventoy installer appropriate for your OS.
+2. Select your USB device carefully—data on this device will be erased.
+3. Click "Install" to set up Ventoy on the drive.
+4. Upon success, the USB drive is ready to hold multiple boot images.
+</Step>
+<Step title="Copy ShredOS and Other Images">
+1. Open the Ventoy USB drive in your file explorer.
+2. Copy the ShredOS `.img` or `.iso` file(s) directly onto the root of the USB.
+3. Copy additional ISOs or IMG files for other operating systems or utilities.
+</Step>
+<Step title="Boot into Ventoy and Select Image">
+1. Insert the Ventoy USB into your target machine.
+2. Configure BIOS/UEFI to boot from USB.
+3. Ventoy boot menu will appear listing all bootable images.
+4. Select the ShredOS image to start the secure erase session.
+</Step>
+</Steps>
+
+<Note>
+Always verify the integrity of your ShredOS images before copying them to Ventoy. This prevents boot failures caused by corrupted files.
+</Note>
+
+---
+
+## 3. Customizing the Boot Menu (Editing grub.cfg inside .img files)
+
+ShredOS images contain an embedded bootloader configuration (e.g., GRUB). To tailor boot options, such as kernel parameters or default selections, you may edit the `grub.cfg` inside the `.img` file.
+
+### Editing Steps
+
+<Steps>
+<Step title="Mount the ShredOS Image">
+1. On a Linux host, create a mount point:
+
+```bash
+sudo mkdir /mnt/shredos_img
+```
+
+2. Mount the image:
+
+```bash
+sudo mount -o loop path/to/shredos.img /mnt/shredos_img
+```
+</Step>
+<Step title="Locate and Edit grub.cfg">
+1. Navigate to the `boot/grub2/` directory in the mounted image:
+
+```bash
+cd /mnt/shredos_img/boot/grub2
+```
+
+2. Edit the `grub.cfg` file with your preferred text editor:
+
+```bash
+sudo nano grub.cfg
+```
+
+3. Customize kernel parameters or menu entries as needed, for example changing console settings or adding autonuke options.
+</Step>
+<Step title="Unmount the Image">
+1. Save changes and exit the editor.
+2. Unmount the image:
+
+```bash
+sudo umount /mnt/shredos_img
+```
+</Step>
+</Steps>
+
+<Tip>
+Be cautious when editing the boot configuration. Incorrect syntax can prevent ShredOS from booting properly.
+</Tip>
+
+---
+
+## 4. Validating your Ventoy Setup
+
+Before deploying in production or critical environments, confirm that Ventoy boots ShredOS and other images correctly.
+
+### Validation Checklist
+
+- **Boot Menu Appearance:** Ventoy shows all copied images at startup.
+- **ShredOS Boot Success:** Selecting ShredOS boots to the main menu or runs autonuke as expected.
+- **Multi-Boot Confirmed:** Other OS images boot without errors.
+
+### Troubleshooting Common Issues
+
+<AccordionGroup title="Common Ventoy & ShredOS Multi-Boot Issues">
+<Accordion title="ShredOS Does Not Appear in Ventoy Menu">
+- Verify the image file is directly on the USB root or properly nested within folders.
+- Ensure the image file extension is supported (`.iso`, `.img`).
+</Accordion>
+<Accordion title="Boot Fails with Error Message">
+- Confirm BIOS/UEFI settings are correct (legacy vs UEFI boot mode).
+- Check image integrity using SHA256 or MD5 checksums.
+- Test booting the image standalone from another USB outside Ventoy to isolate the issue.
+</Accordion>
+<Accordion title="Custom grub.cfg Changes Not Applied">
+- Double-check you edited the correct `grub.cfg` inside the image.
+- Verify the image was properly unmounted and changes saved.
+- Some images may use embedded configs that require rebuilding. Refer to ShredOS build docs.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 5. Best Practices and Tips
+
+- Keep your Ventoy installation updated to the latest version for improved compatibility.
+- Use descriptive file names for images on the Ventoy USB to avoid confusion.
+- Backup your Ventoy USB contents regularly.
+- When editing boot configurations, document changes for repeatability and troubleshooting.
+- Test in a non-critical environment before deploying on live systems.
+
+---
+
+## 6. Next Steps
+
+After successfully setting up ShredOS with Ventoy:
+
+- Explore automated wipe modes like `autonuke` by customizing boot parameters.
+- Set up PXE network booting for remote deployment (see 'Booting and Running ShredOS' guide).
+- Review related topics on ShredOS configuration and troubleshooting for advanced use.
+
+---
+
+## 7. Additional Resources
+
+- [Ventoy Official Documentation](https://www.ventoy.net/en/doc_start.html) — In-depth Ventoy guidance and advanced features.
+- [ShredOS Quickstart Guide](/guides/getting-started-workflows/quickstart-guide) — Basic usage and wipe options.
+- [Booting and Running ShredOS](/guides/getting-started-workflows/booting-running-shredos) — More about boot options and system behavior.
+- [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues) — Resolve boot and detection problems.
+- [ShredOS Configuration Options](/getting-started/first-use-configuration/configuring-options) — Customize defaults and behavior.
+
+---
+
+## Example: Copying ShredOS Image to Ventoy USB on Linux
+
+```bash
+# Assuming Ventoy USB is mounted at /media/user/VENTOY
+cp path/to/shredos_amd64.img /media/user/VENTOY/
+
+# Optionally copy other ISOs
+cp path/to/ubuntu.iso /media/user/VENTOY/
+echo "Files copied."
+```
+
+On reboot, Ventoy’s menu will list both images for easy selection.
+
+---
+
+This guide empowers you to leverage Ventoy for multi-boot USB drives combining ShredOS with other operating systems, streamlining secure disk erasure within diverse IT environments.
+
+
+---
+
+<Check>
+You have now a Ventoy bootable USB with ShredOS alongside other OSes, optionally customized grub.cfg, and verified your setup for smooth multi-boot usage.
+</Check>
+
+---
+
+<Source url="https://github.com/PartialVolume/shredos.x86_64" branch="main" paths={[{"path": "getting-started/installation-setup/ventoy-and-multi-boot.mdx", "range": "all"}]} />

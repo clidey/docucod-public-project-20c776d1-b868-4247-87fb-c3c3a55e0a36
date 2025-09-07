@@ -1,0 +1,206 @@
+---
+title: "Changing Keyboard Layout and System Locale"
+description: "Step-by-step examples for setting the preferred keyboard layout on boot and persisting language or locale settings, ensuring accessibility for international users and compliance with local operational needs."
+---
+
+# Changing Keyboard Layout and System Locale
+
+This guide shows you how to set the keyboard layout and system locale preferences in ShredOS, ensuring your environment matches your regional and language needs. Whether you require a different keyboard layout at boot or want to persist locale settings to operate in your native language, this document provides step-by-step examples for configuration and persistence.
+
+---
+
+## Overview
+
+Secure disk erasure workflows in ShredOS often demand users to interact with the system using keyboard inputs in their preferred language. Since ShredOS is built on Linux and uses the `nwipe` utility, configuring keyboard layouts and system locales both at boot and persistently helps make the environment accessible and user-friendly across diverse international users.
+
+This page focuses exclusively on configuring keyboard layouts and locale settings within ShredOS, particularly through Buildroot configurations and bootloader command line adjustments.
+
+
+## What You Will Achieve
+
+- Set a preferred keyboard layout at boot time.
+- Customize and persist language (locale) settings.
+- Understand how ShredOS applies these settings.
+- Avoid common pitfalls related to keyboard and locale mismatches.
+
+---
+
+## Prerequisites
+
+- Basic familiarity with editing `grub.cfg` or your bootloader configuration.
+- Access to the ShredOS boot media image files or build environment.
+- Understanding of your target user environment’s keyboard and language requirements.
+
+---
+
+## Step 1: Understanding Keyboard and Locale Configuration in ShredOS
+
+ShredOS inherits its keyboard and locale configurations from the underlying Linux environment, which is built using Buildroot.
+
+### Important Components:
+
+- **kbd package**: Provides keyboard utilities, including keymap loading.
+- **xkeyboard-config package**: Offers X11 keyboard database for graphical environments (optional).
+- **setxkbmap tool**: Runtime tool for setting keyboard layout in X server.
+- **Locale generation and settings**: Typically controlled via kernel parameters or initialization scripts.
+
+ShredOS uses kernel command-line parameters passed via the bootloader (`grub.cfg`) to configure keyboard layouts and locale.
+
+---
+
+## Step 2: Setting Keyboard Layout on Boot
+
+The keyboard layout can be specified at boot time via parameters passed to the kernel. This ensures when the system boots, it correctly interprets the keyboard inputs.
+
+### How to Set:
+
+1. **Locate and edit your bootloader configuration file:**
+   - Typically this is `grub.cfg` for BIOS/UEFI booting.
+
+2. **Add or modify the `loadkeys` command or kernel parameter:**
+   - Use keyboard layout codes recognized by the `kbd` package, for example `us`, `fr`, `de`, `ru`, etc.
+
+3. **Example grub.cfg snippet to set keyboard layout to French:**
+
+   ```bash
+   linux /boot/vmlinuz root=/dev/sda1 rw quiet loadkeys=fr
+   ```
+
+   Alternatively, you can add a command in init scripts to execute `loadkeys fr`.
+
+4. **Confirm the keyboard layout is loaded properly during boot:**
+   - At login prompt, try typing keys that differ by layout.
+
+---
+
+## Step 3: Persisting Locale and Language Settings
+
+Unlike temporary keyboard layout loading, persisting locale ensures system messages, formats, and utilities respect your language preferences.
+
+### Configuring Locale in Buildroot (recommended for rebuilds)
+
+1. **Enable locale generation: **
+   - In Buildroot configuration menu (`make menuconfig`):
+     - Navigate to `System configuration` -> `Generate locale data`.
+     - Specify locales you want, e.g., `en_US.UTF-8 fr_FR.UTF-8`.
+
+2. **Set default locale:**
+   - Configure the `default local time` and locale environment variables in root filesystem overlay or init scripts.
+
+3. **Example setting in `/etc/profile` or `/etc/environment`:**
+
+   ```bash
+   export LANG=en_US.UTF-8
+   export LANGUAGE=en_US:en
+   export LC_ALL=en_US.UTF-8
+   ```
+
+4. **For Buildroot, there is an option to purge unwanted locales:**
+   - `BR2_ENABLE_LOCALE_PURGE` (enabled by default) to reduce image size.
+   - Whitelist only the locales you want with `BR2_ENABLE_LOCALE_WHITELIST`.
+
+### Applying persistent locale without rebuild:
+
+- Use a root filesystem overlay to add your custom `/etc/locale.conf` or `/etc/default/locale` file with your locale settings.
+
+Example `/etc/locale.conf`:
+
+```bash
+LANG=en_GB.UTF-8
+LC_TIME=fr_FR.UTF-8
+```
+
+- This file will be picked up on system start-up in systemd or similar init system environments.
+
+---
+
+## Step 4: Setting Keyboard Layout in X or Wayland Sessions (If applicable)
+
+If you use ShredOS with an X11 graphical environment or Qt based UI:
+
+1. **Use `setxkbmap`:**
+   - Add to session startup scripts:
+
+   ```bash
+   setxkbmap us
+   ```
+
+2. **xkeyboard-config package must be included:**
+   - Ensure the `xkeyboard-config` package and related libraries (`libx11`, `libxkbfile`, `libxrandr`) are enabled in Buildroot.
+
+3. **Customize layout variants:**
+   - Example for French variant Azerty:
+
+   ```bash
+   setxkbmap fr
+   ```
+
+---
+
+## Practical Example: Adding French Keyboard Layout and Locale
+
+To configure ShredOS with a French keyboard and locale, follow these brief steps:
+
+1. In your `grub.cfg` file, append:
+
+   ```bash
+   loadkeys=fr
+   ```
+
+2. In Buildroot, enable `Generate locale data` and specify `fr_FR.UTF-8` in the locale list.
+
+3. Add the following to `/etc/locale.conf` via an overlay:
+
+   ```bash
+   LANG=fr_FR.UTF-8
+   LC_MESSAGES=fr_FR.UTF-8
+   ```
+
+4. Rebuild your ShredOS image and boot. Your keyboard and system locale should default to French.
+
+---
+
+## Tips and Best Practices
+
+- Always verify your chosen keyboard layout code matches the supported keymaps from the `kbd` package.
+- When customizing buildroot overlays, keep your modifications organized under `board/<vendor>/<boardname>/rootfs-overlay/`.
+- Use the `BR2_ENABLE_LOCALE_PURGE` option wisely to avoid unnecessarily large images.
+- For devices without graphical interfaces, focus on console keymap settings (e.g., `loadkeys` and kernel args).
+- For automated build and deployment pipelines, script these configuration changes into your image build system.
+
+---
+
+## Troubleshooting
+
+<AccordionGroup title="Common Issues and Solutions">
+<Accordion title="Keyboard layout not applying on boot">
+Make sure you added the correct `loadkeys` parameter or `loadkeys` command in the boot script. Confirm that the keyboard layout code is supported by the `kbd` package.
+</Accordion>
+<Accordion title="Locale settings not persistent">
+Verify that your locale configuration files exist in the root filesystem and are loaded during boot. Using overlays or post-build scripts is recommended to persist these settings.
+</Accordion>
+<Accordion title="Incorrect character input in graphical environment">
+Ensure that `xkeyboard-config` and its dependencies are included in the build. Use `setxkbmap` at session start to apply the expected keyboard layout.
+</Accordion>
+<Accordion title="Buildroot locale options ignored or causing build failures">
+Check if `BR2_ENABLE_LOCALE_WHITELIST` matches the locales requested. Rebuild locale data if necessary by cleaning and rebuilding.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Additional Resources
+
+- [Buildroot System Configuration Reference](https://buildroot.org/downloads/manual/manual.html#system-configuration)
+- [kbd Package Documentation](http://www.kernel.org/pub/linux/utils/kbd/)
+- [xkeyboard-config Project](https://www.x.org/archive/individual/data/xkeyboard-config/)
+- Buildroot official documentation chapters on Localization and Keyboard Settings.
+- ShredOS Documentation: [Configuring ShredOS Options](../getting-started/first-use-configuration/configuring-options)
+
+---
+
+## Summary
+
+Configuring keyboard layouts and locales in ShredOS is vital for international usability and complying with regional operational requirements. This page guided you through setting keyboard layouts on boot via kernel parameters, persisting locale preferences with Buildroot configurations and overlays, and handling graphical environment keyboard settings if present. Following these steps helps provide an accessible and culturally appropriate interface for users working with ShredOS.
+
+---

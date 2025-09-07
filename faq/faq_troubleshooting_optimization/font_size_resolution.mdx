@@ -1,0 +1,131 @@
+---
+title: "How do I fix small fonts or low display resolution?"
+description: "Provides steps to adjust terminal font size and change display resolution for improved usability, especially on high-DPI screens or MacBook Pro devices. Includes persistent (grub.cfg) and temporary (setfont) fixes."
+---
+
+# How do I fix small fonts or low display resolution?
+
+Ensuring appropriate font size and display resolution in ShredOS significantly improves readability and usability, especially on high-DPI screens like modern laptops or MacBook Pro devices. This guide provides clear, actionable steps to adjust terminal font size and change display resolution temporarily and persistently, empowering you to tailor the display to your needs.
+
+---
+
+## Understanding the Issue
+
+Small fonts or low resolution can make the ShredOS terminal difficult to read, slowing down your workflow and increasing errors. This is commonly encountered on high-resolution displays or MacBook Pros, where the default settings may render fonts too tiny or the display output insufficiently scaled.
+
+Why is this important?
+
+- Proper font sizing enhances visibility for long wipe sessions.
+- Adequate resolution adjustment can prevent UI clipping and improve terminal layout.
+- Customization ensures comfort and reduces eye strain.
+
+
+---
+
+## How to Adjust Terminal Font Size and Display Resolution
+
+There are two primary approaches to solving font size and resolution issues in ShredOS:
+
+### 1. Temporary Adjustment Using `setfont`
+
+Use this quick method if you want to test font sizes during a single ShredOS session:
+
+<Steps>
+<Step title="Open the ShredOS Console">
+Access the terminal during or after boot.
+</Step>
+<Step title="List Available Fonts">
+Run `ls /usr/share/consolefonts/ | grep 16` to display fonts sized for readability (e.g., ter-16, ter-v16b).
+</Step>
+<Step title="Set a Larger Font Temporarily">
+Execute:
+
+```bash
+setfont /usr/share/consolefonts/ter-16.psf
+```
+
+This command increases font size immediately but will reset after reboot.
+</Step>
+</Steps>
+
+<Tip>
+Temporary font changes made with `setfont` last for the current session only and revert on reboot.
+</Tip>
+
+
+### 2. Persistent Fix via `grub.cfg` Configuration
+
+To maintain larger fonts or improve resolution every time ShredOS boots, modify the GRUB bootloader configuration:
+
+<Steps>
+<Step title="Locate Your `grub.cfg` File">
+Find `grub.cfg` inside your boot media or Ventoy partitions.
+</Step>
+<Step title="Edit the font-related settings">
+Add or modify the following lines in `grub.cfg` to load a console font and adjust console resolution persistently:
+
+```bash
+# Load a larger console font
+setfont /usr/share/consolefonts/ter-16.psf
+
+# Set video mode for higher resolution
+set gfxmode=1024x768x32
+terminal_output gfxterm
+```
+
+(Note: Adjust `gfxmode` dimensions to your preferred resolution)
+</Step>
+<Step title="Save and Reboot">
+Once saved, reboot the device. The console font and resolution will persistently apply for enhanced readability.
+</Step>
+</Steps>
+
+<Warning>
+Editing `grub.cfg` incorrectly can cause boot failures. Back up your file before changes.
+</Warning>
+
+---
+
+## Best Practices and Tips
+
+- **Select fonts matching your display DPI:** Higher DPI devices benefit from larger console fonts.
+- **Test temporary adjustments first:** Use `setfont` to explore what font sizes feel comfortable before making persistent changes.
+- **Keep a backup of your bootloader configs:** Safeguard against misconfiguration by saving original `grub.cfg` versions.
+- **Use Ventoy multi-boot safely:** If running ShredOS alongside other OSes, configure `grub.cfg` overlays per image, not Ventoy's base.
+
+---
+
+## Common Pitfalls
+
+- Forgetting that `setfont` changes are session-only leads users to think the fix didn’t apply.
+- Using unsupported font files or incorrect font paths in `grub.cfg` results in fallback to default small fonts.
+- Setting unsupported resolution modes in `gfxmode` can cause black screens or distorted output.
+
+If you face issues:
+- Verify font file paths.
+- Try safer resolution settings like `800x600` if higher do not work.
+- Refer to ShredOS’s common issues documentation for hardware-specific quirks.
+
+---
+
+## Additional Resources
+
+- [ShredOS: Troubleshooting Common Issues](https://docs.shredos.org/getting-started/troubleshooting-advanced/common-issues)
+- [Configuring ShredOS Options](https://docs.shredos.org/getting-started/first-use-configuration/configuring-options)
+- [Ventoy Multi-Boot Setup](https://docs.shredos.org/getting-started/installation-setup/ventoy-and-multi-boot)
+
+---
+
+## Summary
+
+By adjusting console fonts and resolution using either the temporary `setfont` command or persistent bootloader configuration, you ensure a more comfortable and accessible ShredOS experience on high-resolution or MacBook Pro displays. These straightforward tweaks dramatically improve usability, letting you focus on secure disk erasure without battling small or unclear terminal output.
+
+<Check>
+Ensure that after performing persistent font or resolution adjustments, you fully reboot your device to see the effects applied.
+</Check>
+
+---
+
+**For expert users:** Combining these settings with other display and keyboard customization options outlined in the ShredOS documentation allows for a fully personalized and effective erasure environment.
+
+---
