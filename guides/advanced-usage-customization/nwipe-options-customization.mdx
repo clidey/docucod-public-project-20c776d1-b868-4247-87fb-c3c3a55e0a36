@@ -1,0 +1,197 @@
+---
+title: "Customizing Nwipe Options and Automation"
+description: "Explains how to customize Nwipe’s default behaviors using command-line options (via the kernel’s grub.cfg), automate multi-disk wipes, schedule actions (like auto-poweroff), and persist these settings between boots for consistent, repeatable workflows."
+---
+
+# Customizing Nwipe Options and Automation
+
+## Workflow Overview
+
+### Purpose
+This guide explains how to customize Nwipe's default behaviors in ShredOS by using command-line options set via the bootloader's `grub.cfg`. It helps users automate multi-disk wipes, schedule system actions like auto power-off, exclude specific devices, and persist these configurations across reboots for reliable, repeatable secure erasure workflows.
+
+### Prerequisites
+- You have a bootable ShredOS USB or ISO environment.
+- You understand basic bootloader (GRUB) configuration and can edit `grub.cfg` on the boot media.
+- Familiarity with command-line syntax for Nwipe is helpful but not required.
+
+### Expected Outcome
+By following this guide, you will be able to:
+- Set default Nwipe options that apply on boot automatically.
+- Exclude drives from wipes and automate wiping of selected devices.
+- Configure advanced options like verification, overwrite rounds, and cleanup behaviors.
+- Automate system power-off after erasure completion.
+- Persist these settings so they apply to every boot.
+
+### Time Estimate
+10-20 minutes, depending on your familiarity with boot media and text editing.
+
+### Difficulty Level
+Intermediate
+
+---
+
+## Customizing Nwipe via Kernel Command Line in grub.cfg
+
+ShredOS runs Nwipe as the primary disk wiping interface, and by default presents an interactive GUI on the first virtual terminal. You can customize this behavior by passing Nwipe command-line options through the Linux kernel's command line in your `grub.cfg` file located on the ShredOS boot medium.
+
+### Editing grub.cfg
+
+1. Mount your ShredOS boot device on another Linux system or virtual terminal.
+2. Open `/boot/grub/grub.cfg` and/or `/EFI/BOOT/grub.cfg` for editing.
+3. Locate the `menuentry` block that boots ShredOS.
+
+Example default block:
+```bash
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3
+}
+```
+
+4. Append an option `nwipe_options="..."` to provide Nwipe with default command-line parameters.
+
+Example adding Nwipe options to wipe with zeros only, no verification, no blanking pass, ignore USB devices, and power down the system on completion:
+```bash
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--method=zero --verify=off --noblank --nousb --autopoweroff"
+}
+```
+
+5. Save the file and safely unmount.
+6. Boot ShredOS and Nwipe will start automatically with these options applied.
+
+
+### Specifying Specific Devices
+
+You can specify which block devices Nwipe should wipe by listing them after the options in the `nwipe_options` string.
+
+Example wiping only `/dev/sdd` and `/dev/sde`:
+```bash
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--method=zero --verify=off --noblank --nousb --autopoweroff /dev/sdd /dev/sde"
+}
+```
+
+### Commonly Used Nwipe Options
+- `--method=METHOD` - Select wipe method (e.g., `zero`, `dodshort`, `gutmann`).
+- `--verify=TYPE` - Verification mode (`off`, `last`, `all`).
+- `--rounds=NUM` - Number of passes.
+- `--noblank` - Disable final blanking pass.
+- `--autonuke` - Start automatic wipe immediately.
+- `--autopoweroff` - Power off system upon completion.
+- `--nosignals` - Disallow interrupt signals during erase.
+- `--nowait` - Do not wait for keypress before exiting.
+- `--exclude=DEVICES` - Exclude specified devices (up to 10).
+- `--logfile=FILE` - Write logs to a specified file.
+- `--PDFreportpath=PATH` - Directory to write PDF certificates.
+- `--prng=METHOD` - Select pseudo random number generator.
+- `--nousb` - Exclude USB devices from wipes.
+- `--nogui` - Run without GUI (must be combined with `--autonuke`).
+
+For the full list see `nwipe --help`.
+
+---
+
+## Automating Multi-Disk Wipes
+
+You can combine CLI options and device list to automate wiping multiple disks without user interaction.
+
+For example:
+```bash
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--autonuke --method=dod522022m --rounds=3 --verify=last --exclude=/dev/sda"
+}
+```
+This example starts wiping all available devices immediately except `/dev/sda`, using 3 passes of DoD 5220.22-M with last pass verification.
+
+---
+
+## Scheduling Actions and Post-Wipe Behavior
+
+ShredOS's Nwipe supports automatic shutdown after completion.
+
+- Use `--autopoweroff` to power off the system about 60 seconds after finishing all wipes.
+- Use `--nowait` to skip the mandatory keypress before exit.
+
+Example with auto shutdown and no wait:
+```bash
+nwipe_options="--autonuke --autopoweroff --nowait"
+```
+
+Tip: During the shutdown delay, you can abort powering off by pressing Control-C and running `shutdown -c`.
+
+---
+
+## Persisting Your Custom Configuration
+
+By embedding your options into the bootloader's `grub.cfg`, your Nwipe startup behavior persists across reboots when using the same boot media.
+
+If you adjust options via the interactive GUI, ShredOS will not save them persistently unless you update `grub.cfg` manually.
+
+---
+
+## Best Practices and Tips
+
+- Always verify device names before adding to CLI to avoid accidental data loss.
+- Use `--exclude` wisely to protect boot drives or any drives you want to keep intact.
+- Combine `--autonuke` and `--nogui` only in secure and controlled environments.
+- When deploying at scale, automate configs for consistent wipe policies.
+- Backup your `grub.cfg` before making edits.
+- After changes, test boots on non-critical systems to confirm behavior.
+
+---
+
+## Troubleshooting and Common Issues
+
+### Wipe Hangs or Fails to Start
+- Confirm correct syntax in `grub.cfg`. Incorrect quotes or missing escapes cause issues.
+- If you experience no devices detected, try omitting `--nousb` or adjusting `--exclude` list.
+
+### Device Exclusion Not Working
+- Ensure device paths in `--exclude` exactly match system device names.
+- The special `shredos_exclude_boot_disc="yes"` option in the kernel line also excludes the boot device.
+
+### Poweroff Does Not Occur
+- Some hardware may not fully support software-initiated shutdown; try manual power off.
+
+### Multiple Wipes Interfering
+- Only one instance of Nwipe should run at a time. Use `--nowait` with caution if running multiple instances.
+
+---
+
+## Examples
+
+### Example: Auto Wipe All Disks except Boot Drive, then Power Off
+```bash
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--autonuke --exclude=/dev/sda --method=dod522022m --rounds=1 --verify=last --autopoweroff"
+}
+```
+
+### Example: Run Zero Wipe on Specific Drives with No GUI
+```bash
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--nogui --autonuke --method=zero /dev/sdb /dev/sdc --noblank --autopoweroff"
+}
+```
+
+### Example: Wipe Using Gutmann Method on /dev/sdd, No Verification
+```bash
+menuentry "shredos" {
+    linux /boot/shredos console=tty3 loglevel=3 nwipe_options="--method=gutmann --rounds=1 --verify=off /dev/sdd"
+}
+```
+
+---
+
+## References and Further Reading
+- [Nwipe Official GitHub](https://github.com/martijnvanbrummelen/nwipe)
+- [ShredOS Readme and Usage](https://github.com/PartialVolume/shredos.x86_64/blob/main/README.md)
+- [ShredOS Quickstart Guide](https://docs.shredos.io/guides/getting-started-workflows/quickstart-guide)
+- [Configuring ShredOS Options & Defaults](https://docs.shredos.io/getting-started/first-use-configuration/configuring-options)
+- [Basic Disk Erasure Guide](https://docs.shredos.io/guides/getting-started-workflows/basic-disk-erasure)
+
+---
