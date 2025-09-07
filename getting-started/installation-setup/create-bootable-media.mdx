@@ -1,0 +1,207 @@
+---
+title: "Create Bootable USB or CD/DVD"
+description: "Clear, stepwise instructions for Linux, Mac, and Windows users to create bootable ShredOS media using tools like dd, Rufus, or Etcher. Includes validation/checksum techniques to avoid corrupt setups."
+---
+
+# Create Bootable USB or CD/DVD
+
+Securely running ShredOS requires creating reliable, bootable installation media. This guide walks you through creating bootable USB flash drives or CD/DVD discs using your Linux, Windows, or Mac system with practical tools like `dd`, Rufus, or Etcher. You'll also learn to verify your media integrity to avoid boot failures caused by corrupt or incomplete writes.
+
+---
+
+## 1. Prerequisites
+
+Before proceeding, ensure you have the following prerequisites:
+
+- **ShredOS Image/ISO**: Download the latest ShredOS image from the [Download ShredOS](../installation-setup/download-shredos) page.
+- **Target Media**: An empty USB flash drive (4GB or larger) or CD/DVD disc.
+- **System with creating tools**:
+  - Linux system with `dd` utility
+  - Windows with Rufus
+  - macOS with `dd` or Etcher
+
+
+<Tip>
+Always back up any existing data on the USB drive or CD/DVD before starting, as this process will erase all content.
+</Tip>
+
+## 2. Creating Bootable USB on Linux/macOS Using `dd`
+
+Linux and macOS users can leverage the built-in `dd` command-line utility to write ShredOS images to USB drives.
+
+### Step-by-step Instructions
+
+<Steps>
+<Step title="Verify Downloaded Image">
+Run:
+```bash
+sha256sum shredos-image.iso
+```
+Compare the output with the published checksum on the download site to ensure file integrity.
+</Step>
+
+<Step title="Identify USB Device">
+List your devices:
+```bash
+lsblk
+```
+or
+```bash
+diskutil list
+```
+Make note of your USB device path (e.g., `/dev/sdb` on Linux or `/dev/disk2` on macOS).
+
+> **WARNING:** Be certain about the device path or you risk overwriting critical data!
+</Step>
+
+<Step title="Unmount USB Drive">
+Unmount any mounted partitions of the USB drive.
+
+On Linux:
+```bash
+sudo umount /dev/sdb1
+```
+On macOS:
+```bash
+diskutil unmountDisk /dev/disk2
+```
+</Step>
+
+<Step title="Write Image to USB">
+Run the following command (adjust device path and image filename):
+
+```bash
+sudo dd if=shredos-image.iso of=/dev/sdX bs=4M status=progress conv=fsync
+```
+Replace `/dev/sdX` with your USB device (e.g., `/dev/sdb`). On macOS, use `/dev/rdiskX` for faster writes.
+</Step>
+
+<Step title="Sync and Eject">
+Make sure data is flushed:
+```bash
+sync
+```
+Unmount and safely eject the device:
+```bash
+diskutil eject /dev/disk2
+```
+</Step>
+
+<Step title="Verify USB Media}">
+Optional: Remount USB and check files or use checksum tools to confirm the write.
+</Step>
+</Steps>
+
+<Tip>
+The `bs=4M` block size speeds up the copying process while `conv=fsync` ensures data integrity.
+</Tip>
+
+<Warning>
+Never use the partition path (e.g., `/dev/sdb1`) for `dd`, always the whole device (e.g., `/dev/sdb`).
+</Warning>
+
+## 3. Creating Bootable USB on Windows with Rufus
+
+Rufus offers a simple GUI for writing ShredOS images onto USB drives on Windows systems.
+
+### Steps
+
+1. Download and launch [Rufus](https://rufus.ie).
+2. Insert your USB drive; Rufus should detect it automatically.
+3. Under "Boot selection," click "Select" and pick your downloaded ShredOS ISO file.
+4. Leave partition scheme as "MBR" or "GPT" depending on your target system firmware (BIOS or UEFI).
+5. Click "Start" and confirm any prompts.
+6. Wait for the process to complete until the status bar shows "READY."
+7. Safely eject your USB drive.
+
+<Note>
+Use GPT partition scheme for UEFI-based modern systems and MBR for legacy BIOS machines.
+</Note>
+
+## 4. Creating Bootable CD/DVD on Any OS
+
+If you prefer optical media, burn the ShredOS ISO image to a CD or DVD using the following instructions.
+
+### On Windows
+
+- Use Windows built-in disc image burner:
+  1. Right-click the ISO file.
+  2. Select "Burn disc image."
+  3. Choose your optical drive.
+  4. Click "Burn".
+
+- Alternatively, use third-party software like ImgBurn.
+
+### On Linux
+
+- Using command line:
+  ```bash
+  wodim dev=/dev/cdrom shredos-image.iso
+  ```
+- Using GUI applications like Brasero or K3b to burn ISO images.
+
+### On macOS
+
+- Open Disk Utility.
+- Select "Burn" from the File menu.
+- Choose the ISO image and your disc.
+- Click "Burn."
+
+<Warning>
+Use high-quality blank media and burn at a moderate speed to reduce errors.
+</Warning>
+
+## 5. Validating the Bootable Media
+
+After creating your bootable media, validation is essential to avoid boot failures.
+
+### Validation tips
+
+- **Checksum Comparison**: Check the downloaded image's checksum before writing and verify any files on the USB after writing.
+- **Test Boot in Virtual Environment**: Use QEMU or VirtualBox to test booting from the created media prior to live deployment.
+- **Device Detection**: Confirm that your target system recognizes the USB or CD/DVD as a boot device.
+
+## 6. Troubleshooting Common Issues
+
+<AccordionGroup title="Common Bootable Media Problems and Solutions">
+<Accordion title="USB Not Booting">
+- Check BIOS/UEFI settings to enable USB boot.
+- Ensure Secure Boot is disabled or the media is signed properly.
+- Try different USB port types (USB 2.0 vs USB 3.0).
+- Recreate media to rule out write errors.
+</Accordion>
+<Accordion title="Corrupt or Incomplete Writes">
+- Verify checksum of the source ISO.
+- Use recommended tools without interrupting the write process.
+- Avoid removing the media prematurely.
+</Accordion>
+<Accordion title="Media Not Recognized on Target System">
+- Confirm media format matches system firmware (UEFI vs BIOS).
+- Try alternative USB drives or CDs/DVDs.
+- Update your system firmware to latest version.
+</Accordion>
+</AccordionGroup>
+
+## 7. Next Steps
+
+- Once your bootable media is ready and verified, proceed to the [First Boot: What to Expect](../first-use-configuration/first-boot-expectations) guide to learn how to boot into ShredOS and start wiping operations.
+- For advanced multi-boot setups, see [Ventoy and Multi-Boot](../installation-setup/ventoy-and-multi-boot).
+- Explore [Troubleshooting Common Issues](../../getting-started/troubleshooting-advanced/common-issues) if you encounter difficulties during boot.
+
+---
+
+## Appendix: Helpful Commands Summary
+
+| Operating System | Command / Tool                | Description                       |
+|------------------|------------------------------|---------------------------------|
+| Linux/macOS      | `dd if=shredos-image.iso of=/dev/sdX bs=4M status=progress conv=fsync` | Write ISO to USB drive           |
+| Windows         | Rufus                        | GUI tool to write ISO to USB    |
+| Linux            | `wodim dev=/dev/cdrom shredos-image.iso` | Burn ISO to CD/DVD               |
+| macOS            | Disk Utility (GUI)           | Burn ISO to CD/DVD              |
+
+
+<Tip>
+Always verify the device path and back up data before writing any media to avoid accidental data loss.
+</Tip>
+
+---
