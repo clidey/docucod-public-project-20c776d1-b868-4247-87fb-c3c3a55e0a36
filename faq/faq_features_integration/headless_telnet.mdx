@@ -1,0 +1,197 @@
+---
+title: "How do I use ShredOS on headless systems or over the network?"
+description: "Describes enabling and using the built-in telnet server for remote or displayless operation, including security recommendations and best practices for LAN use."
+---
+
+# How do I use ShredOS on headless systems or over the network?
+
+This page explains how to enable and use ShredOS's built-in telnet server to operate securely on systems without a physical display or keyboard, or remotely over a Local Area Network (LAN). It details activating the telnet service, connecting remotely, security best practices, and troubleshooting common issues. The guidance ensures users can perform disk erasure workflows remotely while maintaining data security and system integrity.
+
+---
+
+## 1. Introduction to Headless and Network Usage
+
+ShredOS supports headless operation by providing a native telnet server that allows remote terminal access via the network. This means you can run ShredOS on systems without a monitor or keyboard (displayless) or manage the wipe process remotely over LAN.
+
+This capability is crucial for data centers, rack servers, or other scenarios where physical access is difficult or impractical.
+
+<Tip>
+Enabling telnet allows you to leverage the full functionality of ShredOS on remote or embedded systems, but it requires careful management to avoid unauthorized access.
+</Tip>
+
+---
+
+## 2. Enabling the Telnet Server
+
+### 2.1 Starting the Telnet Service
+
+ShredOS uses the BusyBox `telnetd` daemon for its telnet server, which is included in the build via the `libtelnet` package.
+
+To start the telnet service manually:
+
+```sh
+/etc/init.d/S50telnet start
+```
+
+Or use the standalone service unit:
+
+```sh
+systemctl start telnetd.service
+```
+
+The telnet daemon is launched with the `-F` option to keep it in the foreground for logging and control.
+
+### 2.2 Automatic Startup
+
+To ensure telnet starts automatically after boot, enable it via systemd:
+
+```sh
+systemctl enable telnetd.service
+```
+
+This ensures remote access is available immediately after ShredOS boots.
+
+### 2.3 Configuration File
+
+The telnet daemon reads arguments from `/etc/default/telnet` if present, where you can customize options like port, logging, or connection limits.
+
+---
+
+## 3. Connecting to ShredOS via Telnet
+
+### 3.1 Preconditions
+
+- Confirm ShredOS is running and the telnet service is active.
+- Your client machine must be on the same local network or have network routing access to the ShredOS host IP.
+- Use a telnet client application (available on Windows, macOS, Linux).
+
+### 3.2 Connection Command
+
+From your client terminal:
+
+```sh
+telnet <shredos-ip-address>
+```
+
+Replace `<shredos-ip-address>` with the actual IP address of the ShredOS system.
+
+### 3.3 Login and Usage
+
+- Upon connection, you will see the ShredOS login prompt.
+- Log in using default credentials or any configured user account (by default, ShredOS has minimal user setup; consult advanced configuration for custom users).
+- After login, you can interact fully with the ShredOS command-line interface and the NWipe utility.
+
+<Tip>
+If network discovery is difficult, consider configuring the ShredOS IP address statically or via DHCP reservation to simplify connections.
+</Tip>
+
+---
+
+## 4. Using NWipe and Managing Wipes Over Telnet
+
+Once connected remotely via telnet, you have full control to:
+
+- Launch `nwipe` to select disks and wiping methods interactively.
+- Monitor wipe progress in real-time.
+- Access logs and generate wipe certificates remotely.
+
+This setup mirrors the local console experience but works over the network.
+
+### 4.1 Command Example
+
+When connected:
+
+```sh
+nwipe
+```
+
+Use nwipe's interface as usual, navigating with keyboard commands.
+
+### 4.2 Logging and Output
+
+Log files and certificate files generated during wipes remain accessible on the ShredOS device's storage or can be exported to USB drives or over the network (consult the related documentation on log export workflows).
+
+---
+
+## 5. Security Recommendations and Best Practices
+
+While telnet is convenient for remote session management, it is inherently insecure as it transmits data, including credentials, in plaintext.
+
+### 5.1 Use Only on Trusted LAN
+
+- Limit the use of telnet strictly to trusted local area networks.
+- Avoid exposing telnet to public or untrusted networks.
+
+### 5.2 Network Isolation
+
+- Segregate ShredOS machines on isolated VLANs or subnets.
+- Employ firewall rules to restrict telnet access to authorized IP ranges.
+
+### 5.3 Alternative Secure Methods
+
+If secure remote access is mandatory, consider network-level tunneling (e.g., SSH tunnels) or VPNs to encapsulate telnet traffic.
+
+### 5.4 Disable Telnet When Not in Use
+
+Turn off the telnet daemon if remote access is no longer required to minimize attack surface:
+
+```sh
+/etc/init.d/S50telnet stop
+```
+
+Or
+
+```sh
+systemctl stop telnetd.service
+```
+
+### 5.5 Audit Connections
+
+Monitor access logs where possible to detect unauthorized or suspicious activity.
+
+<Warning>
+Never expose the ShredOS telnet server directly to the internet or untrusted networks. Doing so risks compromising your data destruction process and system integrity.
+</Warning>
+
+---
+
+## 6. Troubleshooting Common Issues
+
+<AccordionGroup title="Troubleshooting Telnet Access and Headless Operation">
+<Accordion title="Cannot Connect to Telnet Server">
+- Verify the telnetd service is running on ShredOS.
+- Confirm the IP address and network connectivity.
+- Check for firewall rules blocking port 23 (default telnet port).
+- Use `ping` and `traceroute` from the client to test network reachability.
+</Accordion>
+<Accordion title="Session Drops or Unresponsive Terminal">
+- Check network stability.
+- Restart telnetd service.
+- Consider limiting concurrent telnet sessions if supported.
+</Accordion>
+<Accordion title="Login Prompt Does Not Appear or Authentication Fails">
+- Verify default credentials.
+- Confirm no configuration changes disable telnet login.
+- Review system logs via console or USB export for telnetd errors.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 7. Next Steps and Related Features
+
+- Explore automation workflows using autonuke and unattended wipes for fully headless operation without manual interaction.
+- Consider configuring network log and erase certificate export to central servers.
+- For advanced network boot and PXE operation, see the "Boot Methods & System Integration" documentation.
+
+---
+
+## 8. References and Additional Resources
+
+- [NWipe Utility Documentation](https://github.com/martine/nwipe)
+- [ShredOS Quickstart Guide](../guides/getting-started-workflows/quickstart-guide)
+- [Guides on Headless Remote Wipes](../guides/advanced-usage-customization/headless-remote-wipes)
+- [Exporting Logs and Certificates Workflow](../guides/certificates-logging-integration/log-export-workflows)
+- [ShredOS Configuration Options](../getting-started/first-use-configuration/configuring-options)
+
+---
