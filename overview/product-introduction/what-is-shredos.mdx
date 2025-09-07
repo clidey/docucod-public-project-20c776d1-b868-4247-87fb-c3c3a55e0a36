@@ -1,0 +1,115 @@
+---
+title: "What is ShredOS?"
+description: "An accessible explanation of ShredOS, highlighting its mission as a bootable Linux distribution purpose-built to securely erase disks on x86_64 and i686 platforms using the nwipe utility. This page covers the product's evolution, its roots in nwipe (as a successor to DBAN/dwipe), and why it's trusted for secure data destruction."
+---
+
+# What is ShredOS?
+
+## Introduction
+
+ShredOS is a specialized bootable Linux distribution designed to provide reliable and secure disk erasure on x86_64 and i686 platforms. It leverages the proven capabilities of the **nwipe** utility—a continuation of the well-known DBAN (Darik's Boot and Nuke) and its fork dwipe—to ensure data is irrecoverably wiped from storage devices.
+
+This project evolved to address the need for a trusted, actively maintained tool that simplifies the process of securely destroying data on various drives, making ShredOS a go-to solution for sensitive data sanitization in enterprise, government, and personal settings.
+
+## Core Mission and Purpose
+
+ShredOS is built to empower users with a user-friendly yet powerful tool to safely erase disks, removing all data traces in a verifiable manner. Its mission is to provide peace of mind when disposing of or repurposing storage hardware by making secure erasure straightforward and reliable.
+
+## Historical Background and Evolution
+
+The roots of ShredOS trace back to **nwipe**, which itself is a reboot of the classic and widely trusted DBAN project. DBAN gained recognition as the de facto standard utility for data destruction via bootable media. However, with the original project no longer maintained, nwipe emerged to modernize and maintain this essential functionality.
+
+ShredOS extends nwipe by packaging it into a dedicated Linux distribution, featuring an easy-to-navigate graphical interface, along with integration into a compact, self-contained system image. This evolution ensures ongoing support, updated hardware compatibility, and a streamlined user experience.
+
+## Why Trust ShredOS for Secure Data Erasure?
+
+- **Proven technology:** Utilizes nwipe, inheriting robustness from DBAN and dwipe.
+- **Bootable Linux environment:** Lightweight and dedicated to the disk wiping task.
+- **Platform support:** Specifically crafted for x86_64 and i686 architectures, covering a wide range of PC hardware.
+- **Verifiable erasure:** Ensures that destroyed data cannot be recovered by conventional means.
+- **Updated and maintained:** Regularly updated kernels, drivers, and dependencies to support evolving storage technologies.
+
+## How ShredOS Works
+
+At boot, ShredOS launches a minimal Linux system configured to run nwipe. Nwipe scans all available storage devices, presenting options to perform various wipe methods, including but not limited to:
+
+- Single-pass writes with zeros or random data
+- Multiple overwrite passes per DoD standards
+- Custom wipe patterns
+
+### Example of Boot Entry in ShredOS
+
+The bootloader—GRUB in this case—uses a straightforward configuration to directly invoke the disk erasure kernel image:
+
+```sh
+set default="0"
+set timeout="0"
+
+menuentry "shredos" {
+	linux /boot/shredos console=tty3 loglevel=3
+}
+```
+
+This initiates the ShredOS kernel and starts the wiping utility.
+
+## Integration With Buildroot
+
+ShredOS is built using the Buildroot system, a powerful tool to generate embedded Linux systems. The defconfig for ShredOS targets x86_64 and i386 architectures, ensuring compatibility with typical PC platforms. Configurations include:
+
+- Glibc-based toolchain
+- System V init system
+- Locale and timezone support
+- Rich package selection tailored for wiping and hardware support
+
+File system overlays and custom post-image scripts fine-tune the final output for ShredOS usage.
+
+### Example Configuration Snippet from shredos_defconfig
+
+```ini
+BR2_x86_64=y
+BR2_TOOLCHAIN_BUILDROOT_CXX=y
+BR2_INIT_SYSV=y
+BR2_ROOTFS_MERGED_USR=y
+BR2_PACKAGE_NWIPE=y
+BR2_PACKAGE_GLIBC_UTILS=y
+BR2_ROOTFS_OVERLAY="board/shredos/fsoverlay"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="board/shredos/doimg.sh"
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="board/shredos/kernel-6.6.22-defconfig.config"
+```
+
+This setup highlights the components that shape ShredOS's lifecycle and features.
+
+## Summary
+
+ShredOS has emerged as a dedicated, modern successor to DBAN and dwipe, using the proven nwipe core within an actively maintained, bootable Linux environment. Intended for secure disk erasure on mainstream PC architectures, ShredOS brings together robust wiping capabilities with a reliable Linux system designed for minimal fuss and maximum security.
+
+This documentation aims to introduce you to ShredOS, explain its purpose and heritage, and help you understand why it is a trusted choice for secure data destruction.
+
+---
+
+For further details on building ShredOS images or customizing its configuration, see the corresponding guides in the Buildroot documentation and ShredOS's user manual.
+
+---
+
+## Additional Resources
+
+- [Buildroot User Manual](http://buildroot.org/downloads/manual/manual.html) – for insights on configuring and building ShredOS
+- [nwipe GitHub](https://github.com/martijnvanbrummelen/nwipe) – the core wiping utility
+- [DBAN Legacy](https://dban.org/) – background on the predecessor
+- [GRUB Bootloader Documentation](https://www.gnu.org/software/grub/manual/grub/grub.html) – for bootloader customization
+
+---
+
+## Troubleshooting and Next Steps
+
+- Ensure you understand your hardware compatibility by referring to supported architectures in ShredOS documentation.
+- Follow the ‘Building ShredOS from Source’ guide to create custom images.
+- Consult Troubleshooting sections for common issues like boot and disk detection.
+
+For more advanced usage, visit related pages covering integration, logging, and automation.
+
+---
+
+*This page fits into the broader ShredOS documentation under the “Getting Started” and “Product Introduction & Value” sections.*
