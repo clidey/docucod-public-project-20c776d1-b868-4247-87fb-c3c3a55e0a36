@@ -1,0 +1,158 @@
+---
+title: "What is ShredOS and what does it do?"
+description: "Learn about ShredOS's core purpose as a secure, bootable Linux distribution for thoroughly erasing disks using the nwipe tool. Understand its value for users seeking reliable, up-to-date, and hardware-compatible data erasure."
+---
+
+# FAQ: What is ShredOS and what does it do?
+
+ShredOS is a specialized, bootable Linux distribution designed primarily for secure and thorough disk erasure. It leverages the powerful `nwipe` utility—an actively maintained fork of the classic DBAN/dwipe tool—to provide reliable and modern disk wiping capabilities on a wide array of Intel-compatible hardware.
+
+---
+
+## Introduction to ShredOS
+
+ShredOS is more than just a simple disk wiping tool. It is a fully bootable Linux environment that runs entirely from USB flash drives or optical media (CD/DVD), allowing users to securely erase entire disks independent of the original operating system installed. By booting directly into ShredOS, users can ensure all data—partitions, file systems, and even hidden areas—is irrecoverably destroyed.
+
+- **Compatibility:** Supports both 32-bit (i586) and 64-bit (x86_64) processors, booting on BIOS and UEFI firmware platforms.
+- **Core Utility:** Includes the latest official version of `nwipe`, providing seven recognized secure wipe methods.
+- **Hardware Support:** Regularly updated Linux kernel and tools ensure broad hardware compatibility, including USB drives, SATA disks, NVMe, and SSDs.
+- **Use Cases:** From IT administrators securely decommissioning hardware, refurbishers wiping devices for resale, to individual users permanently removing sensitive data.
+
+---
+
+## Why Use ShredOS?
+
+Many users have historically relied on DBAN, which ceased updates in 2015, causing compatibility issues with newer hardware and lacking recent security features. ShredOS addresses these challenges:
+
+- **Ongoing Maintenance:** Actively maintained, providing updates to the kernel and `nwipe` software.
+- **Enhanced Features:** Supports network booting (PXE) and headless operation (via optional Telnet server).
+- **Automation & Flexibility:** Offers both interactive wiping with a GUI and automated wiping modes configurable from bootloader parameters.
+- **Comprehensive Utilities:** Includes complementary disk tools like `smartmontools`, `hdparm`, `hexedit`, and `nvme-cli` for advanced storage management and firmware erasures.
+
+---
+
+## How Does ShredOS Work?
+
+At boot, ShredOS launches `nwipe` automatically in the primary virtual terminal. Users interact with an intuitive text-based GUI to select disks, choose wipe methods, customize parameters such as rounds and verification, and initiate wiping.
+
+### Key Features:
+
+- **Secure Erasure Methods:** Choose from zeroing, ones, PRNG streams, DoD standard wipes, Gutmann method, RCMP OPS-II, and HMG IS5 enhanced sanitization.
+- **Device Detection:** Detects and lists all block storage devices, including exclusion options to protect the boot media.
+- **Wipe Automation:** Configure command-line parameters via the `grub.cfg` file to enable autonuke (auto-wipe) modes.
+- **Logging & Certification:** Automatically generate detailed logs and multi-page PDF certificates summarizing wipe success and drive health.
+
+### Additional Utilities:
+
+- Smart device monitoring with `smartmontools`.
+- Disk parameter tuning with `hdparm` and `nvme-cli` for SSD and NVMe firmware-level secure erase commands.
+- Disk content examination and modification with `hexedit`.
+- Parallel job handling with GNU `parallel`.
+
+---
+
+## Usage Scenarios
+
+1. **Single or Multiple Disk Secure Erasure:** Securely wipe one or several disks simultaneously.
+2. **Headless Environments:** Use the optional Telnet server for remote interaction on systems without display hardware.
+3. **PXE Network Boot:** Boot ShredOS over the network for large scale wipe deployments.
+4. **Automated Bulk Wiping:** Customize wipe options and enable autonuke mode to start wiping immediately upon boot.
+
+---
+
+## How to Obtain and Use ShredOS
+
+### Downloading
+
+Pre-built `.img` and `.iso` images are available for both 32-bit and 64-bit architectures, supporting USB flash drives and optical media. Official release assets and pre-release versions can be downloaded from the [ShredOS GitHub releases page](https://github.com/PartialVolume/shredos.x86_64/releases).
+
+### Writing to USB or CD/DVD
+
+- **Linux/Mac:** Use `dd` to write the `.img` file to a USB drive or burn the `.iso` file.
+- **Windows:** Use utilities like Rufus or Balena Etcher.
+- **Multi-boot USB:** Compatible with Ventoy to manage multiple boot images on one USB device.
+
+### Booting
+
+Supports BIOS and UEFI boot modes. For MacBook Pro users, special notes on boot key sequences and terminal usage apply.
+
+### Post-wipe
+
+After a wipe, disks will be entirely blank with all partitions, file systems, boot records, and data removed. They will require formatting or OS installation to be reused.
+
+---
+
+## Customization and Configuration
+
+ShredOS supports persistent configuration via kernel command-line options in the bootloader's `grub.cfg` file, allowing users to:
+
+- Change default wipe methods and verification modes.
+- Enable or disable autonuke mode.
+- Specify device exclusions (e.g., to protect the boot drive).
+- Adjust keyboard layouts using `loadkeys` options.
+- Redirect logs and certificate outputs to USB storage or network servers.
+
+Virtual terminals provide access to additional utilities and command line.
+
+---
+
+## Troubleshooting Highlights
+
+- **Drive Detection Issues:** Delays on boot for USB devices to initialize are normal; updating to recent ShredOS versions fixes most detection delays.
+- **Boot Problems:** Verify that the system firmware supports USB or optical boot and that correct boot devices are selected.
+- **Small Font or Display Issues:** Use `setfont` commands in alternate terminals to enlarge font size.
+- **Compatibility:** Certain USB adapters or storage devices may not work reliably; verified hardware is recommended.
+
+---
+
+## Learn More and Next Steps
+
+For advanced users, ShredOS can be built from source using Buildroot, allowing kernel and package customization. Refer to these detailed guides:
+
+- [Building ShredOS from Source](https://github.com/PartialVolume/shredos.x86_64/blob/main/README.md#compiling-shredos-and-burning-to-usb-stick-the-harder-way-)
+- [Quickstart Guide: Securely Erasing a Disk](../guides/getting-started-workflows/quickstart-guide)
+- [Advanced Usage: Nwipe Options Customization](../guides/advanced-usage-customization/nwipe-options-customization)
+- [Expert Practices: Firmware Enhanced SSD and NVMe Erase](../guides/expert-practices-special-cases/firmware-enhanced-erase-ssd-nvme)
+- [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues)
+
+---
+
+For further technical insights into how ShredOS is built and its integration within the Buildroot build system, consult the [Buildroot Manual](https://buildroot.org/downloads/manual/manual.html) and the ShredOS project repository.
+
+---
+
+## Summary
+
+ShredOS is a focused, secure bootable Linux image tailored for reliable and modern disk erasure operations on a broad range of Intel-compatible hardware. Combining the updated `nwipe` tool with useful disk utilities and flexible deployment options, it ensures users can confidently destroy data in interactive or automated modes.
+
+---
+
+### Key Points:
+- Purpose-built for secure, reliable disk wiping using nwipe.
+- Bootable from USB or CD/DVD on BIOS or UEFI systems.
+- Supports 32-bit and 64-bit architectures.
+- Offers interactive GUI and command-line modes.
+- Supports logging and erasure certification.
+- Includes additional disk utilities for diagnostics and firmware erasing.
+- Can be network or headless operated.
+
+### Important Links:
+- [Download Latest ShredOS Releases](https://github.com/PartialVolume/shredos.x86_64/releases)
+- [NWipe Official Repository](https://github.com/martijnvanbrummelen/nwipe)
+- [Buildroot Manual](https://buildroot.org/downloads/manual/manual.html)
+- Related Documentation:
+  - Quickstart Guide
+  - Advanced Nwipe Customization
+  - Firmware Enhanced SSD/NVMe Erasure
+  - Troubleshooting Common Issues
+
+### Next Steps:
+- Prepare boot media and verify hardware compatibility.
+- Customize kernel command-line for automated or customized wipe behavior.
+- Use virtual terminals for advanced disk utility access.
+- Explore source build for tailored integrations.
+- Consult troubleshooting documentation for operational issues.
+
+---
+
+This FAQ page provides a foundational understanding of ShredOS’s core purpose, guiding users toward effective and secure disk erasure using contemporary tools and techniques.
