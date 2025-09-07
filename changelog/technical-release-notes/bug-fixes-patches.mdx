@@ -1,0 +1,165 @@
+---
+title: "Bug Fixes & Security Patches"
+description: "Enumerates all bug fixes, stability improvements, and security patches applied since the previous release. Useful for users who rely on ShredOS in sensitive environments or who want confidence in reliability."
+---
+
+# Bug Fixes & Security Patches
+
+This page details all bug fixes, stability improvements, and security patches applied since the previous ShredOS release. It provides a comprehensive view for users relying on ShredOS in sensitive environments who require confidence in the reliability and security of their erasure operations.
+
+---
+
+## Overview
+
+ShredOS integrates with the Buildroot build system, which delivers continual updates composed of bug fixes and security updates. This page enumerates those updates impacting ShredOS, focusing specifically on issue resolutions, patch applications, and package stability improvements that enhance the secure erasure environment.
+
+Most patches are managed within Buildroot’s package infrastructure and applied automatically during the build process, ensuring consistent and reproducible builds.
+
+---
+
+## Patch Versioning and Sources
+
+- Current patch set version included in ShredOS: **2.7.6**
+- Patches are sourced from the GNU project mirror and licensed under **GPL-3.0+**.
+- Patch files include fixes for known issues like segmentation faults and command execution vulnerabilities.
+
+### Patch Details:
+- Fixes include handling of mangled rename processes to prevent segfaults.
+- Prevention of arbitrary command execution in `ed` style patches.
+- Improvements to direct invocation of `ed` rather than through shell intermediaries.
+- Control over symbolic link following behavior by default, adhering strictly to safe defaults.
+- Extended options support for filesystem extended attribute handling, controlled via the `BR2_PACKAGE_ATTR` configuration option.
+
+These patches collectively enhance system stability and security when invoking and managing patch applications during the build.
+
+---
+
+## Recent Security and Bug Fix Highlights (Since Last Release)
+
+### 2024.11 Release Highlights:
+
+- General fixes across various packages including security-sensitive components such as `gnutls`, `mosquitto`, and `procps-ng`.
+- Specific resolution of a build error in `procps-ng` traced back to the 2024.08 release.
+
+### Release Candidates (2024.11-rc1 to rc3):
+
+- Widespread fixes improving overall system robustness.
+- Updates and fixes applied to toolchains, utilities, and libraries critical to system security like `alsa-lib`, `gnutls`, `python-psycopg2`, `rust`, and security tools such as `polkit` and `postgreqsl`.
+
+### Security-Relevant Fixes in 2024.08:
+
+- Multiple packages addressing vulnerabilities and stability issues: `apache`, `asterisk`, `bind`, `php`, `postrgresql`, and others.
+- Added `python-pyqt5-sip` to bolster GUI-related dependencies safely.
+
+### Infrastructure & Build Enhancements:
+
+- Improved handling on package patch application by strictly disallowing fuzzing during patch application (`-F0`), preventing silent patch mismatches.
+- Enhanced post-build hook systems to ensure proper application of post-patch and post-build steps.
+- Increased reproducibility and hash integrity checking, tightening the verification of downloaded sources and patches.
+
+---
+
+## How Patches Are Applied Within ShredOS Buildroot
+
+The build system applies patches in the following user-impacting sequence:
+
+1. **Pre-Patch Hooks**: Custom actions executed prior to patching, allowing tailored preparation.
+2. **Cleanup**: Removal of residual patch rejection files ensuring clean patch application.
+3. **Application of Downloaded Patches**: Patches included via package variables or external locations are applied.
+4. **Internal Package Patches**: Patches provided within the Buildroot package directories are applied alphabetically by default, with recommended numeric prefixes (e.g., `0001-fix-bug.patch`) to ensure a strict order.
+5. **Global Patch Directory**: If configured, patches from user-defined global directories are applied to overlay and supplement default fixes.
+6. **Post-Patch Hooks**: Additional customized fixes or build adjustments after patches are applied.
+
+Failures at patch application steps result in build termination to prevent unstable builds.
+
+---
+
+## Content and Licensing of Patches
+
+- Patches are released under the license of the software they modify, typically matching the upstream license.
+- Each patch should include a clear commit message explaining the problem and the fix.
+- Patches must contain a 'Signed-off-by' line certifying the contributor’s rights to submit the patch.
+- When applicable, patches should reference upstream commits or mailing list submissions through an `Upstream:` trailer.
+- In cases where patches are Buildroot-specific, an explicit notation `Upstream: N/A` with rationale is recommended.
+
+This disciplined approach helps ensure accountability, traceability, and ease of maintenance.
+
+---
+
+## Best Practices for Users and Contributors
+
+- Users running ShredOS in sensitive environments should always use the latest stable releases to benefit from all security patches.
+- Verify build integrity by checking patch and source hashes included in Buildroot.
+- When customizing or extending ShredOS via Buildroot, maintain patches following the Buildroot patch policy to ease future maintenance.
+- Use package-specific and global patch directories wisely to introduce secure custom fixes or enhancements.
+
+---
+
+## Troubleshooting Common Patch Application Issues
+
+- Patch failure usually indicates a mismatch between source versions or interfering modifications.
+- Confirm your Buildroot `.config` matches source versions expected by patches.
+- Check patch file ordering and naming conventions; numeric prefixes help ensure correct ordering.
+- Review build logs for specific patch rejection errors.
+
+---
+
+## Additional Resources
+
+- For an in-depth understanding of patching within Buildroot, see the [Patching a Package Documentation](https://buildroot.org/downloads/manual/manual.html#patch-policy).
+- Detailed Buildroot changelogs provide a chronological history of fixes and updates.
+- Buildroot mailing lists and Patchwork interface are essential for community support and patch review.
+- Buildroot User Manual for guidance on rebuilding packages, applying patches manually, and SDK usage.
+
+---
+
+## Practical Example: Sample Patch in ShredOS Buildroot
+
+```diff
+From 079ed8aa57ba6629b992c3d0d01904d3e5170d3b Mon Sep 17 00:00:00 2001
+From: "Yann E. MORIN" <yann.morin.1998@free.fr>
+Date: Wed, 5 Jun 2024 13:06:16 +0200
+Subject: [PATCH] build.sh: do not apply patches
+
+In Buildroot, we handle applying the patches in a generic way, with
+appropriate tools (e.g. with a proper tar).
+
+Upstream: not applicable
+Signed-off-by: Yann E. MORIN <yann.morin.1998@free.fr>
+---
+ build.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/build.sh b/build.sh
+index d1fedff..26efc53 100755
+--- a/build.sh
++++ b/build.sh
+@@ -10,6 +10,8 @@ BUILD_OPTS="USING_UMP=0
+      USING_DEVFREQ=1"
+
+ apply_patches() {
++    return 0  # Patching handled by Buildroot
++
+     pushd $2
+
+     quilt push -a
+@@ -22,6 +24,8 @@ apply_patches() {
+ }
+ 
+unapply_patches() {
++    return 0  # Patching handled by Buildroot
++
+     pushd $2
+
+     quilt pop -a
+```
+
+This example illustrates how patching responsibilities can be transferred cleanly to Buildroot's infrastructure, preventing duplicate patch applications.
+
+---
+
+## Summary
+
+Staying current with Buildroot patches integrated into ShredOS is essential for a secure, stable disk erasure environment. These patches address both critical vulnerabilities and operational bugs, ensuring the highest reliability for users working in regulated or high-security contexts.
+
+---
