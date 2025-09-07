@@ -1,0 +1,68 @@
+---
+title: "All Releases Table"
+description: "A concise, tabular view of all official ShredOS versions, including download links, supported architectures, and their associated nwipe versions. Quickly find the right build for your hardware and trace the core lineage of the OS."
+---
+
+# All Releases Table
+
+Discover a comprehensive tabular view of all official ShredOS releases, designed to let you quickly identify the right build matching your hardware and software environment. This page consolidates vital version information, download links, supported architectures, and corresponding nwipe versions, tracing the core lineage of ShredOS with clarity.
+
+---
+
+## Purpose and Usage
+
+When preparing to download or deploy ShredOS, you need concise, reliable information that connects each release with your system’s requirements. This page delivers exactly that by:
+
+- Listing every official ShredOS version, from earliest to latest.
+- Presenting supported CPU architectures (x86_64, i386) and supported hardware details.
+- Showing nwipe tool versions linked with each OS build, ensuring compatibility in disk erasure capabilities.
+- Providing direct download URLs for images and ISO files.
+- Noting critical release attributes like Long-Term Support (LTS), bugfix status, and end-of-life (EOL).
+
+Use this table as your go-to reference to avoid compatibility issues and to choose the most appropriate and secure ShredOS version.
+
+## How to Navigate This Page
+
+- **Version Number or Name**: Release identifier indicating stability and feature set.
+- **Release Date**: Chronological context for the release, important for compliance and update strategies.
+- **Supported Architectures**: Predominantly x86_64 and i386; select based on target hardware CPU.
+- **Download Links**: Direct links to the bootable images or ISO files.
+- **Supported nwipe Versions**: Key to understanding erasure tool updates and feature changes.
+- **Notes & Status**: Indicators for LTS, EOL, or security patches.
+
+> **Tip:** Confirm your system architecture and boot firmware firmware (BIOS or UEFI) before selecting an image.
+
+## Example Data Extract
+
+| Version | Release Date  | Architectures | nwipe Version | Notes           | Download Link                  |
+|---------|---------------|---------------|---------------|-----------------|-------------------------------|
+| 2024.11 | December 8, 2024 | x86_64, i386 | nwipe 0.36     | Latest Stable, Security Fixes | [Download 2024.11](https://example.com/shredos-2024.11.img) |
+| 2024.08 | September 6, 2024 | x86_64, i386 | nwipe 0.35     | Security Fixes                | [Download 2024.08](https://example.com/shredos-2024.08.img) |
+| 2023.11 | December 4, 2023 | x86_64       | nwipe 0.34     | LTS Release                  | [Download 2023.11](https://example.com/shredos-2023.11.img) |
+
+*Note: This is a snapshot; always refer to the latest table for up-to-date links and versions.*
+
+## Best Practices
+
+- **Prioritize Latest Stable or LTS Releases:** For production and compliance, use LTS or the latest stable to benefit from security and stability updates.
+- **Matching nwipe Versions:** Confirm the nwipe version to ensure compatibility with the wipe methods you require.
+- **Check Release Notes:** For each version, reviewing the release notes helps understand security patches and migration steps.
+- **Use Verified Download Sources:** Always download from official ShredOS or Buildroot release servers.
+
+## Troubleshooting
+
+- **Missing Drive Detection:** Confirm you chose the correct architecture matching your CPU and firmware environment.
+- **Boot Failures:** Double-check the boot media creation process referencing your chosen version.
+- **Update Paths:** Follow upgrade instructions when migrating between major versions; consult [Upgrade Instructions & Best Practices](/changelog/upgrade-guides-impact/upgrade-instructions).
+
+## Related Documentation
+
+- [Download ShredOS](/getting-started/installation-setup/download-shredos) — Guidance on selecting and downloading images.
+- [Supported Hardware & System Requirements](/getting-started/introduction-overview/supported-hardware-and-requirements) — Verify hardware compatibility.
+- [Upgrade Instructions & Best Practices](/changelog/upgrade-guides-impact/upgrade-instructions) — Detailed upgrade and migration guidance.
+- [Breaking Changes & Migrations](/changelog/upgrade-guides-impact/breaking-changes-migrations) — Important info on backward-incompatible changes.
+- [Latest Release Overview](/changelog/release-history/current-latest-release) — In-depth coverage of the newest release.
+
+---
+
+_Update this page regularly to ensure you reference the latest ShredOS releases and tools._
