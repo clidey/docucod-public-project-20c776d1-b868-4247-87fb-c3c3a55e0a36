@@ -1,0 +1,238 @@
+---
+title: "Exporting Logs and Certificates to USB or Network"
+description: "Covers workflows for saving logs/certificates to USB storage, FTP/TFTP servers (with sample lftp config), and handling log transfers in Ventoy and EFI/BIOS environments, ensuring traceability and integration into enterprise records."
+---
+
+# Exporting Logs and Certificates to USB or Network
+
+## Workflow Overview
+
+Secure record-keeping is essential for maintaining compliance and proving successful disk erasure. This guide walks you through exporting logs and erasure certificates from ShredOS to external storage devices or network locations, ensuring you archive your erasure proofs efficiently and reliably.
+
+### What You Will Achieve
+
+- Save erasure logs and certificates to a USB flash drive
+- Export logs and certificates directly to FTP or TFTP network servers
+- Handle log transfer workflows with multi-boot environments such as Ventoy
+- Manage log exports in both EFI and BIOS boot modes
+- Integrate export procedures into enterprise recordkeeping workflows
+
+### Prerequisites
+
+- A complete disk erasure has just finished on ShredOS, with logs and certificates generated
+- Access to a USB storage device formatted with a supported filesystem (e.g., FAT32, exFAT)
+- Network credentials and access for FTP or TFTP servers, including login info if needed
+- If using Ventoy multi-boot USB setups, have ShredOS installed and understand basic Ventoy operations
+- Console access to ShredOS environment (keyboard and monitor or remote console)
+
+### Time Estimate
+
+Exporting logs to USB or a network server typically takes less than 5 minutes per operation, depending on log size and network speed.
+
+### Difficulty Level
+
+Beginner to Intermediate — no advanced networking skills required, but familiarity with basic file operations and network shares aids completion.
+
+---
+
+## Step-by-Step Instructions
+
+### 1. Exporting Logs and Certificates to USB Storage
+
+1. **Complete the Disk Erasure Process:**
+   - Ensure your wipe has fully finished and that the system generated logs and certificates (usually stored in `/var/log/shredos` or `/root` directory).
+
+2. **Insert USB Storage Device:**
+   - Plug your USB drive into the system USB port.
+   - Confirm USB device detection by checking `dmesg` or running `lsblk`.
+
+3. **Mount the USB Device:**
+   - Identify the device node (e.g., `/dev/sdb1`).
+   - Create a mountpoint: `mkdir /mnt/usb`
+   - Mount the USB device: `mount /dev/sdb1 /mnt/usb`
+
+4. **Copy Logs and Certificates:**
+   - Navigate to the directory containing logs/certificates, e.g., `/root/logs` or `/var/log/shredos/`.
+   - Copy files to USB:
+
+   ```sh
+   cp /var/log/shredos/*.log /mnt/usb/
+   cp /var/log/shredos/*.pdf /mnt/usb/
+   ```
+
+5. **Verify Files on USB:**
+   - List files on the USB mount point to confirm transfer: `ls -l /mnt/usb/`
+
+6. **Safely Unmount USB:**
+   - After copying completes, run: `umount /mnt/usb`
+   - Remove USB drive safely to avoid corruption.
+
+<Tip>
+Always use a properly formatted USB drive (FAT32 or exFAT) for compatibility with ShredOS.
+</Tip>
+
+### 2. Exporting Logs and Certificates to FTP or TFTP Servers
+
+1. **Prepare FTP/TFTP Server Details:**
+   - Obtain the server IP address or hostname, directory path, and username/password if required.
+
+2. **Configure lftp for FTP Transfers:**
+   - Use ShredOS’s included `lftp` utility for FTP uploads.
+   - Create or edit a configuration file (e.g., `/root/lftp.conf`) with the following template:
+
+   ```ini
+   set ftp:ssl-allow no
+   open ftp://username:password@ftp.example.com
+   lcd /var/log/shredos
+   cd /remote/path/to/target
+   mput *.log *.pdf
+   bye
+   ```
+
+3. **Execute the Upload:**
+   - Run `lftp -f /root/lftp.conf`
+   - Confirm that files transfer successfully by server logs or output.
+
+4. **For TFTP Transfers:**
+   - Place logs on a TFTP server share directory if available.
+   - Typically, TFTP does not support secured authentication; manually move files to server’s TFTP root.
+
+5. **Verification:**
+   - Confirm file presence on the FTP/TFTP server using a separate FTP client or command.
+
+<Warning>
+Avoid unencrypted FTP on insecure networks—use secure transfer methods where possible or a VPN.
+</Warning>
+
+### 3. Exporting Logs in Ventoy Multi-Boot Environments
+
+1. **Boot ShredOS from Ventoy USB:**
+   - Use Ventoy to boot ShredOS alongside other tools.
+
+2. **Prepare a Persistent Partition or USB Device:**
+   - Ventoy supports a persistent partition where logs can be saved.
+   - Mount this partition or an external USB drive.
+
+3. **Export Logs as per USB Storage Instructions:**
+   - Copy logs to the persistent partition or an external USB device.
+
+4. **Handling Log Locations:**
+   - Since Ventoy boots from a read-only ISO image, logs won’t persist unless saved externally.
+
+<Tip>
+When using Ventoy, always plan an external USB or network location for storing erasure proofs because Ventoy’s ISO images are not writable.
+</Tip>
+
+### 4. Export Considerations for EFI and BIOS Systems
+
+- File system detection and USB support in EFI or BIOS boot modes may differ.
+- Always verify USB or network device is recognized post-boot.
+- Use `dmesg` and `lsblk` commands to confirm device visibility.
+
+### 5. Confirming Traceability and Enterprise Integration
+
+- Store exported logs and certificates in a central secure archive.
+- Label storage devices with dates, system IDs, and wipe details.
+- Maintain consistent naming conventions for certificates (e.g., `erasername_date_time.pdf`).
+- Automate log export where possible using preconfigured `lftp` scripts or batch processes.
+
+---
+
+## Examples & Configuration Samples
+
+### Sample lftp Configuration File
+
+```ini
+# File: /root/lftp.conf
+set ftp:ssl-allow no
+open ftp://user:password@192.168.1.100
+lcd /root/logs
+cd /incoming/shredos
+mput *.log *.pdf
+bye
+```
+
+Run with:
+
+```sh
+lftp -f /root/lftp.conf
+```
+
+This sends all `.log` and `.pdf` files from `/root/logs` to the `/incoming/shredos` directory on the FTP server.
+
+### Mounting and Copying Logs to USB
+
+Commands:
+
+```sh
+mkdir /mnt/usb
+mount /dev/sdb1 /mnt/usb
+cp /root/logs/*.log /mnt/usb/
+cp /root/logs/*.pdf /mnt/usb/
+umount /mnt/usb
+```
+
+### Verifying Log Transfer
+
+After copying logs, check contents:
+
+```sh
+ls -l /mnt/usb/
+```
+
+Look for correctly named log and PDF files with timestamps.
+
+---
+
+## Troubleshooting & Tips
+
+### Common Issues
+
+- **USB Device Not Detected:**
+  - Try a different USB port or device.
+  - Check with `dmesg` for connection errors.
+
+- **Mount Failure:**
+  - Confirm device node with `lsblk` or `fdisk -l`.
+  - Check filesystem type; FAT32 is recommended.
+
+- **FTP Transfer Errors:**
+  - Verify credentials and server availability.
+  - Check firewall rules blocking FTP.
+
+- **Files Not Found on Network Server:**
+  - Confirm remote directory path.
+  - Check server log permissions.
+
+- **Logs Missing Post-Ventoy Boot:**
+  - Save files externally; Ventoy’s ISO environment is read-only.
+
+### Best Practices
+
+- Use labeled USB drives exclusively for log exports to avoid confusion.
+- Automate network exports with scripts to minimize manual error.
+- Regularly verify your certificate and log storage integrity.
+
+### Performance Considerations
+
+- Large logs may take longer to transfer over slower networks.
+- Compress logs into `.tar.gz` archives to speed transfers if supported.
+
+### Alternative Approaches
+
+- Network share exports via SMB/CIFS are not currently supported but may be handled manually via mounting if advanced Linux skills are available.
+- Consider using PXE boot and centralized log collection for larger environments.
+
+---
+
+## Next Steps & Related Content
+
+- Review [Generating and Saving Erasure Certificates](../certificates-logging-integration/certificate-generation-best-practices) for certificate creation details.
+- Explore [Advanced Usage: Network Wipes and Remote Logs](../advanced-usage-customization/headless-remote-wipes) for remote wipe and log collection.
+- Consult [Ventoy and Multi-Boot Setup](../../installation-setup/ventoy-and-multi-boot) for integrating ShredOS in multi-boot USB drives.
+- Check [Troubleshooting Common Issues](../../troubleshooting-advanced/common-issues) if device recognition or log saving problems persist.
+- Plan integration with enterprise compliance systems by following organizational log retention policies.
+
+---
+
+By following this guide, you empower your secure erasure processes with reliable, accessible, and verifiable proof of data destruction. Exporting your logs and certificates correctly ensures full traceability and audit readiness, strengthening your data security posture with ShredOS.
