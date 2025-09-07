@@ -1,0 +1,238 @@
+---
+title: "Wiping SSDs and NVMe Drives Using Firmware Commands"
+description: "Detailed, practical guide for leveraging tools like hdparm and nvme-cli (both included in ShredOS) to trigger fast, firmware-based secure erases on modern SSDs and NVMe devices, including advanced options for sanitize, crypto erase, and troubleshooting frozen disks."
+---
+
+# Wiping SSDs and NVMe Drives Using Firmware Commands
+
+Securely erasing modern SSD and NVMe drives differs significantly from traditional magnetic disk wiping techniques. Leveraging firmware-based secure erase features provides a much faster, more thorough process by instructing the drive itself to sanitize data internally. ShredOS includes key utilities—`hdparm` for SATA/ATA-based SSDs and `nvme-cli` for NVMe devices—to execute these firmware-level wipes safely and effectively.
+
+---
+
+## 1. Workflow Overview
+
+### Task Description
+This guide helps you perform fast, secure firmware-level erasure on SSDs and NVMe drives using ShredOS tools `hdparm` and `nvme-cli`. It covers checking device compatibility, unfreezing drives if necessary, executing sanitize and crypto erase commands, and verifying wipe success.
+
+### Prerequisites
+- A running ShredOS environment booted on the target hardware.
+- Familiarity with basic Linux commands and terminal usage.
+- Identification of correct device names for your SSDs or NVMe drives (e.g., `/dev/sdX` or `/dev/nvmeX`).
+- Administrative (root) access.
+
+### Expected Outcome
+A securely wiped SSD or NVMe drive where all user data has been invalidated or removed at the firmware level, leaving no recoverable data.
+
+### Time Estimate
+- Device inspection and preparation: ~5 minutes
+- Firmware erase duration: varies by drive, typically minutes
+
+### Difficulty Level
+Intermediate — requires cautious use of powerful, irreversible commands.
+
+---
+
+## 2. Step-by-Step Instructions
+
+Each step outlines how to wipe either an SSD or an NVMe device using firmware commands included with ShredOS.
+
+### 2.1 Wiping an SSD Using `hdparm`
+
+#### Step 1: Open a Virtual Terminal
+Press `ALT + F2` to access a terminal separate from the wiping GUI.
+
+#### Step 2: Identify the Target Device
+Run:
+```bash
+fdisk -l
+```
+Locate your target SSD by model, size, and device path (e.g., `/dev/sdX`).
+
+#### Step 3: Check If Drive Is Frozen
+```bash
+hdparm -I /dev/sdX | grep frozen
+```
+Example output:
+```
+		not	frozen
+```
+If the drive state is "frozen", proceed to step 4.
+
+#### Step 4: Unfreeze the Drive (if needed)
+Try putting the system into a suspend (sleep) state and waking it up:
+```bash
+rtcwake -m mem -s 5
+```
+or
+```bash
+echo -n mem > /sys/power/state
+```
+Check the frozen state again with the command in Step 3 until it shows "not frozen".
+
+#### Step 5: Check Sanitize Command Support
+```bash
+hdparm --sanitize-status /dev/sdX
+```
+Look for "Sanitize Idle" indicating support.
+
+Check if block erase is supported:
+```bash
+hdparm -I /dev/sdX | grep BLOCK_ERASE_EXT
+```
+
+#### Step 6: Perform Firmware Sanitize Block Erase
+This command tells the drive to run a block erase sanitize operation:
+```bash
+hdparm --yes-i-know-what-i-am-doing --sanitize-block-erase /dev/sdX
+```
+This operation is asynchronous; check status periodically with Step 5's command.
+
+#### Step 7: (Alternative) Use Security Erase Unit
+If sanitize isn't supported, or for drives that support security erase:
+1. Set a temporary security password:
+```bash
+hdparm --user-master u --security-set-pass p /dev/sdX
+```
+2. Start the security erase:
+```bash
+hdparm --user-master u --security-erase p /dev/sdX
+```
+> **Note:** Use `--security-erase-enhanced` for better erasure if supported.
+
+#### Step 8: Verify the Drive Is Wiped
+```bash
+dd if=/dev/sdX bs=8192 status=progress | hexdump -C | head
+```
+You should see only zeros or random data.
+
+### 2.2 Wiping an NVMe Drive Using `nvme-cli`
+
+#### Step 1: Open a Virtual Terminal
+`ALT + F2` to terminal.
+
+#### Step 2: List NVMe Devices
+```bash
+nvme list
+```
+Identify your NVMe device (e.g., `/dev/nvme0`).
+
+#### Step 3: Check Sanitize Support
+```bash
+nvme id-ctrl -H /dev/nvme0 | grep Sanitize
+```
+Look for supported operations such as "Block Erase", "Crypto Erase", or "Overwrite".
+
+#### Step 4: Execute Sanitize Command
+Choose operation type:
+- `2` = Block Erase (usually sufficient)
+- `3` = Overwrite
+- `4` = Crypto Erase
+
+Example block erase sanitize:
+```bash
+nvme sanitize -a 2 /dev/nvme0
+```
+
+#### Step 5: Check Sanitize Status
+```bash
+nvme sanitize-log /dev/nvme0
+```
+Status `0x101` indicates completion.
+
+#### Step 6: (Alternative) Use NVMe Format for Secure Erase
+Check format capabilities:
+```bash
+nvme id-ctrl /dev/nvme0 | grep fna
+```
+- If result includes `0x4`, crypto erase supported.
+
+Perform format:
+- Crypto erase:
+```bash
+nvme format /dev/nvme0 -n 0xffffffff -ses=2
+```
+- Otherwise, standard secure erase:
+```bash
+nvme format /dev/nvme0 -n 0xffffffff -ses=1
+```
+
+#### Step 7: Verify the Drive Is Wiped
+```bash
+dd if=/dev/nvme0 bs=8192 status=progress | hexdump -C | head
+```
+Expect zeros or random data output.
+
+---
+
+## 3. Examples & Command Summary
+
+### Example: Sanitize SSD
+```bash
+sudo hdparm --sanitize-block-erase /dev/sda
+```
+
+### Example: Security Erase SSD
+```bash
+sudo hdparm --user-master u --security-set-pass p /dev/sda
+sudo hdparm --user-master u --security-erase p /dev/sda
+```
+
+### Example: Sanitize NVMe with Block Erase
+```bash
+sudo nvme sanitize -a 2 /dev/nvme0
+```
+
+### Example: Format NVMe with Crypto Erase
+```bash
+sudo nvme format /dev/nvme0 -n 0xffffffff -ses=2
+```
+
+---
+
+## 4. Troubleshooting & Tips
+
+### Common Issue: Drive Is Frozen
+- The drive typically refuses to accept ATA secure erase commands when "frozen" for safety.
+- Use the suspend/hibernation workaround with:
+  ```bash
+  rtcwake -m mem -s 5
+  ```
+- Retry unfreeze commands until verified unfrozen.
+
+### Best Practices
+- Always double-check device names before running erase commands.
+- Use sanitize commands when supported — they are faster and more thorough than manual wiping.
+- Remember that these commands are irreversible and will permanently erase all data.
+- Consider verifying the wipe by reading raw data after the operation.
+
+### Performance Considerations
+- Firmware erase commands typically finish in minutes, far faster than multiple-pass software overwrites.
+- Sanitize with Block Erase is preferred over Security Erase Unit where available.
+- Crypto Erase invalidates encryption keys, effectively wiping encrypted SSDs instantly.
+
+### Alternative Approaches
+- If `hdparm` or `nvme-cli` commands fail or devices are unsupported, fallback to ShredOS interactive wipe modes.
+- Use software wipes on non-SSD mechanical drives as firmware erase commands may be unsupported.
+
+---
+
+## 5. Next Steps & Related Content
+
+### What's Next
+- After firmware erasure, the drive will appear empty and ready for secure redeployment or disposal.
+- Format or repartition the drive before re-use.
+
+### Related Guides
+- [Basic Disk Erasure with ShredOS](https://docs.shredos.io/guides/getting-started-workflows/basic-disk-erasure)
+- [Configuring ShredOS Options and Defaults](https://docs.shredos.io/getting-started/first-use-configuration/configuring-options)
+- [Troubleshooting Common Issues](https://docs.shredos.io/getting-started/troubleshooting-advanced/common-issues)
+- [Wiping Drives on Headless Systems](https://docs.shredos.io/guides/advanced-usage-customization/headless-remote-wipes)
+
+### Resources
+- `hdparm` man page: https://linux.die.net/man/8/hdparm
+- `nvme-cli` GitHub: https://github.com/linux-nvme/nvme-cli
+
+---
+
+# Summary
+With ShredOS, leveraging firmware-based sanitize and secure erase commands using `hdparm` and `nvme-cli` lets you securely erase SSDs and NVMe devices quickly and reliably. This guide walks you through identifying your drives, ensuring they are unfrozen, running appropriate firmware erase commands, verifying success, and handling common pitfalls. Firmware erases provide a trusted, high-speed alternative to traditional multi-pass overwrites, essential for modern solid-state devices.
