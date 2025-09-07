@@ -1,0 +1,160 @@
+---
+title: "Why do some USB adapters or storage devices not work?"
+description: "Lists known issues with USB-to-SATA adapters and workarounds, including supported chipsets, potential need for re-plugging, and community-tested recommendations."
+---
+
+# Why do some USB adapters or storage devices not work?
+
+Secure disk erasure with ShredOS relies on detecting and accessing drives properly through USB interfaces. However, not all USB-to-SATA adapters, USB hubs, or storage devices function seamlessly with ShredOS. This page explains common issues related to USB adapters and storage device compatibility, providing guidance and workarounds to ensure successful operation.
+
+---
+
+## Understanding the Issue
+
+Many users encounter difficulties where their USB adapters or external storage devices are not recognized, fail to initialize properly, or behave unpredictably during disk wiping sessions in ShredOS. These problems often stem from limited chipset support, device quirks, or power management behaviors inherent in the adapters or devices.
+
+### Common Symptoms
+
+- Drives not detected at all
+- Drives disappearing after initial detection
+- Inability to start or complete a wipe
+- Write errors or communication timeouts
+
+These symptoms make secure erasure impossible and can delay or halt your workflow, especially in bulk or automated erasure environments.
+
+---
+
+## Known Incompatibilities and Supported Chipsets
+
+ShredOS supports a wide range of USB-to-SATA bridge chipsets and storage devices, but compatibility is not universal. The following chipsets and devices are known to work well:
+
+- ASMedia ASM1051, ASM1153
+- JMicron JMS567, JMS578, JMS583
+- Renesas/NEC USB 3.0 bridges
+- VIA VL805 USB controllers
+- Standard USB mass storage compliant devices
+
+Community users have also reported positive experiences with adapters from reputable brands using these chipsets.
+
+<Info>
+Always verify your USB adapter's chipset if encountering issues. Sometimes the adapter's branding differs from the actual chip it uses.
+</Info>
+
+Adapters or devices utilizing non-standard or obsolete chipsets, some branded USB 2.0-to-SATA adapters, or certain USB hubs with built-in chipset modifications may cause problems.
+
+---
+
+## Typical Causes of USB Adapter Problems
+
+1. **Chipset Limitations**: Some USB-to-SATA bridge chips lack proper support for SCSI command sets or have buggy firmware.
+
+2. **Power Management Issues**: The device or adapter may enter low-power states, causing detection or transfer failures.
+
+3. **Cable or Hub Quality**: USB hubs, especially unpowered or low-quality models, may not provide sufficient power or stable data signaling.
+
+4. **Device Quirks**: Certain external drives or adapters implement vendor-specific commands or unusual behavior not fully handled by ShredOS.
+
+5. **Firmware Bugs**: Older adapter firmware may not properly handle certain requests during disk erase operations.
+
+6. **Drive Compatibility**: Some drives require specific USB-to-SATA bridges or direct SATA connections to carry out certain wipe commands.
+
+---
+
+## Workarounds and Best Practices
+
+### 1. Replug the Device
+
+Power cycle the USB adapter and device by unplugging and re-plugging. This can reset the adapter's state and may restore detection.
+
+### 2. Try Different USB Ports
+
+Use different ports on the erasing system, preferably USB 3.x ports directly on the motherboard. Avoid low-quality hubs.
+
+### 3. Avoid Multi-Port Hubs
+
+Bypass USB hubs when possible. Direct connection to the system USB controller improves stability and detection.
+
+### 4. Use Known Compatible Adapters
+
+Prefer adapters with well-established chipsets like ASMedia or JMicron. Community forums and hardware reviews often list compatible models.
+
+### 5. Update Adapter Firmware
+
+If firmware upgrades are available from the adapter manufacturer, apply them to address known bugs.
+
+### 6. Boot Parameters and Kernel Modules
+
+In some cases, advanced users can add kernel parameters or blacklist troublesome USB modules to improve compatibility. However, this requires deep Linux knowledge and is not generally recommended for typical users.
+
+---
+
+## Community and Further Information
+
+Many users share their experiences about which USB adapters have worked or not in [ShredOS Community Forum](https://forum.shredos.io) and the [ShredOS GitHub Issues](https://github.com/PartialVolume/shredos.x86_64/issues). Before purchasing or using an adapter, check these resources to avoid known problems.
+
+You can also refer to the [Supported Hardware and System Requirements](../getting-started/introduction-overview/supported-hardware-and-requirements) for broader hardware compatibility details.
+
+---
+
+## Summary: Reliable USB Adapter Usage with ShredOS
+
+- Use adapters with popular chipsets like ASMedia ASM1153 or JMicron JMS578
+- Connect drives directly to USB 3.x ports on host PC
+- Avoid unpowered or low-quality USB hubs
+- Replug drives if detection fails
+- Consult community for compatible device recommendations
+
+When these guidelines are followed, ShredOS will detect drives reliably, enabling secure, consistent disk erasure.
+
+---
+
+## Troubleshooting USB Adapter Issues
+
+<AccordionGroup title="USB Adapter Troubleshooting Steps">
+<Accordion title="Drive Not Detected">
+- Confirm the adapter uses a supported chipset.
+- Test different USB ports, preferably USB 3.x on motherboard.
+- Reboot the system and replug adapter.
+- Check system BIOS/UEFI settings to ensure USB Legacy and USB 3.x support is enabled.
+- Review logs from 'dmesg' or ShredOS's diagnostic terminal for USB errors.
+- Try a different known-good adapter or direct SATA connection as a test.
+</Accordion>
+<Accordion title="Intermittent Drive Visibility">
+- Check for power issues; use powered USB hubs only.
+- Inspect and replace USB cables if suspect.
+- Disable USB autosuspend if possible via kernel boot parameters.
+- Use the ShredOS option to disable disk spindown.
+- Avoid using multiport hubs.
+</Accordion>
+<Accordion title="Write or Communication Errors During Wipe">
+- Ensure adapter firmware is up to date.
+- Confirm drive health with SMART tools.
+- Use direct SATA connection if possible.
+- Verify that the USB adapter supports pass-through of SCSI commands.
+- Test with different wipe methods.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Additional Resources
+
+- [Supported Hardware and System Requirements](../getting-started/introduction-overview/supported-hardware-and-requirements)
+- [Troubleshooting Common Issues](../getting-started/troubleshooting-advanced/common-issues)
+- [Boot Methods & System Integration](../overview/architecture/booting-integration)
+- Community Forum: https://forum.shredos.io
+- GitHub Issues: https://github.com/PartialVolume/shredos.x86_64/issues
+
+---
+
+<Check>
+To ensure success, always verify your USB adapters' chipset compatibility and prefer direct connections to system USB controllers. Avoid low-quality or unpowered hubs when wiping drives with ShredOS.
+</Check>
+
+<Warning>
+Do not assume all USB adapters support the necessary command passthrough for secure disk wiping. Incorrect or unsupported adapters may cause wipe failures or data integrity risks.
+</Warning>
+
+<Note>
+The USB adapter issue page complements the broader [Supported Hardware and System Requirements](../getting-started/introduction-overview/supported-hardware-and-requirements) but focuses specifically on adapter-related quirks and solutions.
+</Note>
