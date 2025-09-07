@@ -1,0 +1,131 @@
+---
+title: "Quick Validation: Test Your Setup"
+description: "How to quickly confirm ShredOS is working: boot validation, drive detection, running a dry/test wipe, and verifying outputs like logs or certificates—so you can be sure the system is operating as expected before wiping production data."
+---
+
+# Quick Validation: Test Your Setup
+
+This guide helps you confirm that your ShredOS installation is functioning correctly before you proceed to wipe production data. You will learn how to validate the boot process, detect connected drives, run a dry/test wipe operation, and verify key outputs such as logs and erasure certificates.
+
+---
+
+## 1. Boot Validation
+
+Ensure your system successfully boots into ShredOS with no errors that prevent further operation.
+
+### Steps:
+
+1. Insert the ShredOS bootable USB or CD/DVD into your target machine.
+2. Power on and watch the boot sequence on the display or serial console.
+3. Confirm the system reaches the ShredOS main interface without errors like "no drive detected" or kernel panics.
+
+#### Success Criteria:
+- ShredOS splash or menu is displayed.
+- No error messages indicating hardware or boot issues.
+
+<Tip>
+If ShredOS does not boot, verify your boot media creation process and your system's BIOS/UEFI boot settings. See 'Download ShredOS' and 'Create Bootable USB or CD/DVD' for details.
+</Tip>
+
+## 2. Drive Detection Verification
+
+Verify that ShredOS correctly detects all drives attached to your system.
+
+### Steps:
+
+1. From the main ShredOS interface, look for the list of detected drives.
+2. Confirm all intended drives appear with correct identifiers (e.g., `/dev/sda`, `/dev/nvme0n1`).
+
+#### Success Criteria:
+- All drives you expect to wipe are listed.
+- No drives have error or inaccessible status.
+
+<Warning>
+If a drive is missing, check:
+- Data and power cables
+- Compatibility with ShredOS (refer to 'System Requirements & Supported Hardware')
+- USB adapter or controller issues
+See 'Troubleshooting Common Issues' for more help.
+</Warning>
+
+## 3. Running a Dry/Test Wipe
+
+To confirm ShredOS operation without affecting data, perform a dry wipe.
+
+### Steps:
+
+1. Select a non-critical drive from the detected drives list.
+2. Choose the _dry/test wipe_ mode, which runs the wipe routine without actual data erasure.
+3. Start the operation following on-screen prompts.
+4. Wait for the process to complete.
+
+#### Success Criteria:
+- The wipe routine completes successfully without errors.
+- System does not modify drive data.
+
+<Tip>
+Dry wipe is an excellent way to validate your configuration and hardware compatibility safely before wiping actual data.
+</Tip>
+
+## 4. Verifying Logs and Certificates
+
+After running any wipe operation (dry or real), verify the output logs and erasure certificates to confirm proper execution.
+
+### Steps:
+
+1. Locate the output storage location (USB key, network share) where ShredOS saves logs and certificates.
+2. Open and review the log files for any error messages or warnings.
+3. Verify the erasure certificate (usually in PDF format) is generated and accurately lists:
+   - Drive identification
+   - Wipe method and parameters
+   - Timestamp
+   - Operation outcome
+
+#### Success Criteria:
+- Logs indicate successful operation.
+- Certificate file is present and contains correct data.
+
+<Note>
+For help with log and certificate exports, see 'Exporting Logs and Certificates to USB or Network'.
+</Note>
+
+---
+
+## Troubleshooting Common Issues
+
+| Issue | Possible Cause | Remediation |
+|---|---|---|
+| ShredOS won’t boot | Faulty boot media or incorrect BIOS/UEFI settings | Recreate boot media, check boot order, refer to 'ShredOS won’t boot—what should I check?' |
+| Drive not detected | Unsupported hardware, faulty connection, or incompatible adapter | Verify hardware compatibility, reconnect drives, check USB adapters |
+| Wipe operation errors | Configuration errors, hardware failures | Review wipe method settings, check logs, try test wipe first |
+
+---
+
+## Tips for Success
+
+- Always test with dry wipes before wiping production drives.
+- Use a display or serial console to observe boot messages.
+- Export logs and certificates to removable media for audit purposes.
+- Confirm device detection each time before wiping.
+
+---
+
+## Next Steps
+
+- If validation is successful, proceed to the [Quickstart: Securely Erasing a Disk](/guides/getting-started-workflows/quickstart-guide).
+- Consult the [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues) guide if you encounter problems.
+- Learn how to customize wipe methods via [Configuring ShredOS (Options & Defaults)](/getting-started/first-use-configuration/configuring-options).
+- Export and manage logs and certificates using [Log and Certificate Export Workflows](/guides/certificates-logging-integration/log-export-workflows).
+
+---
+
+## References
+
+- [System Requirements & Supported Hardware](/getting-started/introduction-overview/supported-hardware-and-requirements)
+- [Quickstart Guide: Securely Erasing a Disk](/guides/getting-started-workflows/quickstart-guide)
+- [Troubleshooting Common Issues](/getting-started/troubleshooting-advanced/common-issues)
+- [Exporting Logs and Certificates to USB or Network](/guides/certificates-logging-integration/log-export-workflows)
+
+---
+
+Ensure your ShredOS workflow is safe, validated, and fully trusted before wiping your production drives.
